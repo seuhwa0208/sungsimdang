@@ -1,6 +1,6 @@
-package com.sungsimdang.project.domain.dto;
+package com.sungsimdang.project.board.dto;
 
-import com.sungsimdang.project.domain.QnaStatus;
+import com.sungsimdang.project.board.domain.QnaStatus;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,4 +1,4 @@
-package com.sungsimdang.project.domain.dto;
+package com.sungsimdang.project.board.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

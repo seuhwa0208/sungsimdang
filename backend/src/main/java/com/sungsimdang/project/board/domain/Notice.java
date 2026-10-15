@@ -1,4 +1,4 @@
-package com.sungsimdang.project.domain;
+package com.sungsimdang.project.board.domain;
 
 import com.sungsimdang.project.member.domain.Member;
 import jakarta.persistence.*;

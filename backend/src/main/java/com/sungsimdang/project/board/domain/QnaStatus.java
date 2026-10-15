@@ -1,4 +1,4 @@
-package com.sungsimdang.project.domain;
+package com.sungsimdang.project.board.domain;
 
 public enum QnaStatus {
     ANSWERED, WAITING

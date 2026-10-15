@@ -1,6 +1,6 @@
-package com.sungsimdang.project.domain.service;
+package com.sungsimdang.project.board.service;
 
-import com.sungsimdang.project.domain.repository.QnaRepository;
+import com.sungsimdang.project.board.repository.QnaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

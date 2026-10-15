@@ -9,6 +9,7 @@ import com.sungsimdang.project.member.dto.PasswordChangeRequest;
 import com.sungsimdang.project.member.dto.SignupRequest;
 import com.sungsimdang.project.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -184,4 +185,10 @@ public class MemberService {
         Member member = findById(id);
         member.setRole(request.getRole());
     }
+
+//    //관리자 - 공지사항, 자료실, Q&A - 관리자인지 확인 및 상태가 활성화 인지 확인
+//    public void validAdmin(Member member){
+//        if (member.getStatus() != MemberStatus.ACTIVE || member.getRole() != MemberRole.ADMIN) throw new AccessDeniedException("권한이 없는 접근입니다.");
+//    }
+
 }

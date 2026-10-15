@@ -1,6 +1,6 @@
-package com.sungsimdang.project.domain.repository;
+package com.sungsimdang.project.board.repository;
 
-import com.sungsimdang.project.domain.Qna;
+import com.sungsimdang.project.board.domain.Qna;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

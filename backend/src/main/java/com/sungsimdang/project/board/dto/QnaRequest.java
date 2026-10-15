@@ -1,4 +1,4 @@
-package com.sungsimdang.project.domain.dto;
+package com.sungsimdang.project.board.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class DataFilesRequest {
+public class QnaRequest {
 
     @NotBlank
     private String title;

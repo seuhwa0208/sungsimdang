@@ -1,6 +1,6 @@
-package com.sungsimdang.project.domain.dto;
+package com.sungsimdang.project.board.dto;
 
-import com.sungsimdang.project.domain.DataFiles;
+import com.sungsimdang.project.board.domain.DataFiles;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,7 +24,7 @@ public class DataFilesResponse {
                 .id(dataFiles.getId())
                 .title(dataFiles.getTitle())
                 .content(dataFiles.getContent())
-                .author(dataFiles.getMember())
+                .author(dataFiles.getMember().getLoginId())
                 .createdAt(dataFiles.getCreatedAt())
                 .updatedAt(dataFiles.getUpdatedAt())
                 .build();

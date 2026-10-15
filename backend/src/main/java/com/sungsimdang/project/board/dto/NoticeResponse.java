@@ -1,6 +1,6 @@
-package com.sungsimdang.project.domain.dto;
+package com.sungsimdang.project.board.dto;
 
-import com.sungsimdang.project.domain.Notice;
+import com.sungsimdang.project.board.domain.Notice;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
