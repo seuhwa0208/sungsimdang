@@ -1,0 +1,2 @@
+<template><div class="rounded bg-white p-6 shadow"><h1 class="mb-6 text-2xl font-bold">글쓰기</h1><BoardForm :model="form" @submit="submit"/></div></template>
+<script setup>import{reactive}from'vue';import{useRouter}from'vue-router';import{boardApi}from'../api/boardApi';import BoardForm from'../components/BoardForm.vue';const form=reactive({title:'',content:''}),router=useRouter();async function submit(){const b=await boardApi.create(form);router.push(`/boards/${b.data.id}`)}</script>
