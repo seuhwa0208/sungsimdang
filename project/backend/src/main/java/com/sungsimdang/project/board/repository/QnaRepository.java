@@ -1,6 +1,7 @@
 package com.sungsimdang.project.board.repository;
 
 import com.sungsimdang.project.board.Qna;
+import com.sungsimdang.project.board.QnaStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,4 +11,5 @@ import java.util.List;
 public interface QnaRepository extends JpaRepository<Qna, Long> {
     List<Qna> findAllByOrderByCreatedAtDesc(); // qna 목록 전체 보기 정렬
     List<Qna> findByMemberIdOrderByCreatedAtDesc(Long memberId); // 특정 회원이 작성한 qna 목록 정렬
+    List<Qna> findByStatusOrderByCreatedAtDesc(QnaStatus status); // 답변 대기 중인 qna 목록 확인
 }
