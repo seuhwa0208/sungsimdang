@@ -1,6 +1,0 @@
-<template><div class="mx-auto max-w-lg rounded-xl bg-white p-8 shadow"><h1 class="mb-6 text-2xl font-bold">회원가입</h1><form @submit.prevent="submit" class="space-y-3"><input v-for="f in fields" :key="f.key" v-model="form[f.key]" :type="f.type||'text'" :placeholder="f.label" class="w-full rounded border p-3" required><p v-if="error" class="text-red-600">{{error}}</p><button class="w-full rounded bg-slate-900 p-3 text-white">가입</button></form></div></template>
-<script setup>
-import { reactive, ref } from 'vue'; import { useRouter } from 'vue-router'; import { memberApi } from '../api/memberApi'
-const router=useRouter(),error=ref(''),fields=[{key:'userid',label:'아이디'},{key:'password',label:'비밀번호',type:'password'},{key:'name',label:'이름'},{key:'tel',label:'전화번호'},{key:'email',label:'이메일'}],form=reactive({userid:'',password:'',name:'',tel:'',email:''})
-async function submit(){try{await memberApi.register(form);router.push('/login')}catch(e){error.value=e.response?.data?.message||'회원가입 실패'}}
-</script>

@@ -23,7 +23,7 @@ public class DataFilesService {
 
     //목록
     public List<DataFilesResponse> findAll() {
-        return dataFilesRepository.findAll().stream().map(DataFilesResponse::from).toList();
+        return dataFilesRepository.findAllByOrderByCreatedAtDesc().stream().map(DataFilesResponse::from).toList();
     }
 
     //게시글 찾기
@@ -36,10 +36,19 @@ public class DataFilesService {
         return DataFilesResponse.from(findById(id));
     }
 
+    //게시글 검색
+    public List<DataFilesResponse> findByKeyword(String type, String keyword){
+        List<DataFiles> dataFiles;
+        if ("TITLE".equals(type)) {dataFiles =  dataFilesRepository.findByTitleContainingOrderByCreatedAtDesc(keyword);}
+        else if ("CONTENT".equals(type)) {dataFiles = dataFilesRepository.findByContentContainingOrderByCreatedAtDesc(keyword);}
+        else {dataFiles = dataFilesRepository.findByTitleContainingOrContentContainingOrderByCreatedAtDesc(keyword,keyword);}
+        return dataFiles.stream().map(DataFilesResponse::from).toList();
+    }
+
     //등록 - 등록하거나 수정은 member의 상태와 권한 따져야함
     @Transactional
-    public DataFilesResponse create(String title, String content, String loginId) {
-        Member member = memberRepository.findByLoginId(loginId).orElseThrow(()->new IllegalArgumentException("잘못된 아이디 입니다."))
+    public DataFilesResponse create(String title, String content, Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(()->new IllegalArgumentException("잘못된 아이디 입니다."));
         DataFiles dataFiles = DataFiles.builder()
                 .title(title)
                 .content(content)
@@ -50,18 +59,19 @@ public class DataFilesService {
 
     //수정
     @Transactional
-    public NoticeResponse update(Long id, String title, String content, String loginId) {
-        Member member = memberService.findByLoginId(loginId);
-        Notice notice = findById(id);
-        notice.setTitle(title);
-        notice.setContent(content);
-        return NoticeResponse.from(notice);
+    public DataFilesResponse update(Long id, String title, String content, Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(()->new IllegalArgumentException("잘못된 아이디 입니다."));
+        DataFiles dataFiles = findById(id);
+        dataFiles.setTitle(title);
+        dataFiles.setContent(content);
+        dataFiles.setMember(member);
+        return DataFilesResponse.from(dataFiles);
     }
 
     //삭제
     @Transactional
     public void delete(Long id) {
-        Notice notice = findById(id);
-        noticeRepository.delete(notice);
+        DataFiles dataFiles = findById(id);
+        dataFilesRepository.delete(dataFiles);
     }
 }

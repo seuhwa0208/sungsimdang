@@ -5,7 +5,6 @@ import com.sungsimdang.project.board.dto.NoticeResponse;
 import com.sungsimdang.project.board.repository.NoticeRepository;
 import com.sungsimdang.project.member.domain.Member;
 import com.sungsimdang.project.member.repository.MemberRepository;
-import com.sungsimdang.project.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +19,9 @@ public class NoticeService {
     private final MemberRepository memberRepository;
 
     //목록
-    public List<NoticeResponse> findAll(){return noticeRepository.findAll().stream().map(NoticeResponse::from).toList();}
+    public List<NoticeResponse> findAll(){
+        return noticeRepository.findAllByOrderByCreatedAtDesc().stream().map(NoticeResponse::from).toList();
+    }
 
     //게시글 찾기
     public Notice findById(Long id){
@@ -31,11 +32,20 @@ public class NoticeService {
     public NoticeResponse findByNotice(Long id){
         return NoticeResponse.from(findById(id));
     }
+    
+    //게시글 검색
+    public List<NoticeResponse> findByKeyword(String type, String keyword){
+        List<Notice> notices;
+        if ("TITLE".equals(type)) {notices =  noticeRepository.findByTitleContainingOrderByCreatedAtDesc(keyword);}
+        else if ("CONTENT".equals(type)) {notices = noticeRepository.findByContentContainingOrderByCreatedAtDesc(keyword);}
+        else {notices = noticeRepository.findByTitleContainingOrContentContainingOrderByCreatedAtDesc(keyword,keyword);}
+        return notices.stream().map(NoticeResponse::from).toList();
+    }
 
     //등록 - 등록하거나 수정은 member의 상태와 권한 따져야함
     @Transactional
-    public NoticeResponse create(String title, String content, String loginId) {
-        Member member = memberRepository.findByLoginId(loginId).orElseThrow(()->new IllegalArgumentException("잘못된 아이디 입니다."));
+    public NoticeResponse create(String title, String content, Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(()->new IllegalArgumentException("잘못된 아이디 입니다."));
         Notice notice =  Notice.builder()
                         .title(title)
                         .content(content)
@@ -46,11 +56,12 @@ public class NoticeService {
     
     //수정
     @Transactional
-    public NoticeResponse update(Long id, String title, String content, String loginId){
-        Member member = memberRepository.findByLoginId(loginId).orElseThrow(()->new IllegalArgumentException("잘못된 아이디 입니다."));
+    public NoticeResponse update(Long id, String title, String content, Long memberId){
+        Member member = memberRepository.findById(memberId).orElseThrow(()->new IllegalArgumentException("잘못된 아이디 입니다."));
         Notice notice = findById(id);
         notice.setTitle(title);
         notice.setContent(content);
+        notice.setMember(member);
         return NoticeResponse.from(notice);
     }
 
