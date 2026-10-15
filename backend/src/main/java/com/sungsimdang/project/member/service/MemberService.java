@@ -24,7 +24,7 @@ public class MemberService {
 
     //회원가입
     @Transactional
-    public Member signup(SignupRequest request) {
+    public Member register(SignupRequest request) {
         Member member = new Member();
         //이미 사용 중인 아이디인지 확인
         if(memberRepository.existsByLoginId(request.getLoginId())) {

@@ -1,2 +1,0 @@
-<template><div><h1 class="mb-6 text-2xl font-bold">마이페이지</h1><div v-if="m" class="rounded bg-white p-6 shadow space-y-2"><p>아이디: {{m.userid}}</p><p>이름: {{m.name}}</p><p>이메일: {{m.email}}</p><p>전화번호: {{m.tel}}</p><RouterLink to="/member/edit" class="inline-block mt-4 rounded bg-slate-900 px-4 py-2 text-white">수정</RouterLink></div></div></template>
-<script setup>import {onMounted,ref} from 'vue';import{memberApi}from'../api/memberApi';const m=ref(null);onMounted(async()=>m.value=(await memberApi.me()).data)</script>
