@@ -18,9 +18,6 @@ public class Bike {
     @Id
     private Long id;
 
-    @Column(nullable = false, length = 100, unique = true)
-    private String bikeNo;
-
     @Column(nullable = false, length = 100)
     private String location;
 

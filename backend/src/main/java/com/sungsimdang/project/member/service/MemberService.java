@@ -3,10 +3,7 @@ package com.sungsimdang.project.member.service;
 import com.sungsimdang.project.member.domain.Member;
 import com.sungsimdang.project.member.domain.MemberRole;
 import com.sungsimdang.project.member.domain.MemberStatus;
-import com.sungsimdang.project.member.dto.MemberRoleUpdateRequest;
-import com.sungsimdang.project.member.dto.MemberUpdateRequest;
-import com.sungsimdang.project.member.dto.PasswordChangeRequest;
-import com.sungsimdang.project.member.dto.SignupRequest;
+import com.sungsimdang.project.member.dto.*;
 import com.sungsimdang.project.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -150,12 +147,8 @@ public class MemberService {
 
     //회원 탈퇴
     @Transactional
-    public void inActive(Long id, String password) {
+    public void inActive(Long id) {
         Member member = findById(id);
-        //비밀번호 맞는지 다시 확인
-        if(!passwordEncoder.matches(password, member.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
         member.setStatus(MemberStatus.INACTIVE);
     }
     //관리자 - 회원 활성화/비활성화/강퇴

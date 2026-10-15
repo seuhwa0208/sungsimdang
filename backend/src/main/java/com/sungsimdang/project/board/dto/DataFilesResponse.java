@@ -24,7 +24,7 @@ public class DataFilesResponse {
                 .id(dataFiles.getId())
                 .title(dataFiles.getTitle())
                 .content(dataFiles.getContent())
-                .author(dataFiles.getMember())
+                .author(dataFiles.getMember().getLoginId())
                 .createdAt(dataFiles.getCreatedAt())
                 .updatedAt(dataFiles.getUpdatedAt())
                 .build();
