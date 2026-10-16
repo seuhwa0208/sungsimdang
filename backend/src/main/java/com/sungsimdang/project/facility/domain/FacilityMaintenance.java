@@ -33,7 +33,8 @@ public class FacilityMaintenance {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private FacilityStatus facilityStatus;
+    @Builder.Default
+    private FacilityStatus facilityStatus = FacilityStatus.REPAIRING;
 
     @Column(nullable = false, updatable = false, name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
