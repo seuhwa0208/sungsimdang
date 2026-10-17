@@ -1,6 +1,8 @@
 package com.sungsimdang.project.bike.dto;
 
+import com.sungsimdang.project.bike.domain.BikeLocation;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +10,6 @@ import lombok.Setter;
 @Setter
 public class BikeRequest {
 
-    @NotBlank
-    private String location;
+    @NotNull
+    private BikeLocation location;
 }

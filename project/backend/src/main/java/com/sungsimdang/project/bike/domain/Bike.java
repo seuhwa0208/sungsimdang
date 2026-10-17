@@ -18,8 +18,9 @@ public class Bike {
     @Id
     private Long id;
 
-    @Column(nullable = false, length = 100)
-    private String location;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private BikeLocation location;
 
     @Column(nullable = false)
     @Builder.Default

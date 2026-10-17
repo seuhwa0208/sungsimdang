@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,6 +36,9 @@ public class MemberRestController {
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.OK)
     public void logout(HttpSession session) {
+        if(!isLogin(session)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
         session.invalidate();
     }
 
@@ -42,7 +46,7 @@ public class MemberRestController {
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
     public MemberResponse register(@Valid @RequestBody SignupRequest request) {
-        return MemberResponse.from(memberService.register(request));
+        return memberService.register(request);
     }
 
     //마이 페이지
@@ -50,10 +54,10 @@ public class MemberRestController {
     @ResponseStatus(HttpStatus.OK)
     public MemberResponse myPage(HttpSession session) {
         if(!isLogin(session)) {
-            throw new IllegalArgumentException("로그인을 해주세요.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
         Member member = (Member) session.getAttribute("loginMember");
-        return MemberResponse.from(memberService.findById(member.getId()));
+        return memberService.findById(member.getId());
     }
 
     //회원 정보 수정
@@ -61,10 +65,10 @@ public class MemberRestController {
     @ResponseStatus(HttpStatus.OK)
     public MemberResponse update(@Valid @RequestBody MemberUpdateRequest request, HttpSession session) {
         if(!isLogin(session)) {
-            throw new IllegalArgumentException("로그인을 해주세요.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
         Member member = (Member) session.getAttribute("loginMember");
-        return MemberResponse.from(memberService.update(member.getId(), request));
+        return memberService.update(member.getId(), request);
     }
 
     //회원 탈퇴
@@ -72,7 +76,7 @@ public class MemberRestController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void inActive(HttpSession session) {
         if(!isLogin(session)) {
-            throw new IllegalArgumentException("로그인을 해주세요.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
         Member member = (Member) session.getAttribute("loginMember");
         memberService.inActive(member.getId());
@@ -84,7 +88,7 @@ public class MemberRestController {
     @ResponseStatus(HttpStatus.OK)
     public void changePassword(@Valid @RequestBody PasswordChangeRequest request, HttpSession session) {
         if(!isLogin(session)) {
-            throw new IllegalArgumentException("로그인을 해주세요.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
         Member member = (Member) session.getAttribute("loginMember");
         memberService.passwordChange(member.getId(), request);

@@ -1,10 +1,13 @@
 package com.sungsimdang.project.bike.service;
 
 import com.sungsimdang.project.bike.domain.Bike;
+import com.sungsimdang.project.bike.domain.BikeLocation;
 import com.sungsimdang.project.bike.domain.BikeMaintenance;
 import com.sungsimdang.project.bike.dto.*;
 import com.sungsimdang.project.bike.repository.BikeMaintenanceRepository;
 import com.sungsimdang.project.bike.repository.BikeRepository;
+import com.sungsimdang.project.member.domain.Member;
+import com.sungsimdang.project.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +20,7 @@ import java.util.List;
 public class BikeService {
     private final BikeRepository bikeRepository;
     private final BikeMaintenanceRepository bikeMaintenanceRepository;
+    private final MemberRepository memberRepository;
     //관리자
     // 자전거 등록
     @Transactional
@@ -28,7 +32,7 @@ public class BikeService {
     // 자전거 수정
     @Transactional
     public BikeResponse update(Long id, BikeRequest request) {
-        Bike bike = bikeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 자전거가 존재하지 않습니다."));
+        Bike bike = bikeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("자전거를 찾을 수 없습니다."));
         bike.setLocation(request.getLocation());
         return BikeResponse.from(bike);
     }
@@ -38,28 +42,32 @@ public class BikeService {
     }
     // 자전거 목록 - 대시보드 / 상태별 정렬
     public List<BikeResponse> listStatus() {
-        return bikeRepository.findAllByOrderByBikeStatusDesc().stream().map(BikeResponse::from).toList();
+        return bikeRepository.findAllByOrderByStatusDesc().stream().map(BikeResponse::from).toList();
     }
     // 자전거 ID 검색
     public BikeResponse findById(Long id) {
-        Bike bike = bikeRepository.findByIdOrderByCreatedAtDesc(id).orElseThrow(() -> new IllegalArgumentException("해당 자전거가 존재하지 않습니다."));
+        Bike bike = bikeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("자전거를 찾을 수 없습니다."));
         return BikeResponse.from(bike);
     }
-    // 자전거 정비 이력 조회 - maintenance
+    // 자전거 정비 이력 전체 조회 - maintenance
     public List<BikeMaintenanceResponse> findAll() {
         return bikeMaintenanceRepository.findAllByOrderByCreatedAtDesc().stream().map(BikeMaintenanceResponse::from).toList();
     }
     // 자전거 고장 등록 - 고장 유형 변경
     @Transactional
-    public BikeMaintenanceResponse faultRegister(BikeFaultRequest request) {
+    public BikeMaintenanceResponse faultRegister(Long id, Long memberId, BikeFaultRequest request) {
+        Bike bike = bikeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("자전거를 찾을 수 없습니다."));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
         BikeMaintenance bikeMaintenance = new BikeMaintenance();
         bikeMaintenance.setBikeFaultType(request.getFaultType());
-        return BikeMaintenanceResponse.from(bikeMaintenance);
+        bikeMaintenance.setBike(bike);
+        bikeMaintenance.setMember(member);
+        return BikeMaintenanceResponse.from(bikeMaintenanceRepository.save(bikeMaintenance));
     }
     // 자전거 상태 변경
     @Transactional
-    public BikeResponse statusUpdate(BikeStatusRequest request) {
-        Bike bike = new Bike();
+    public BikeResponse statusUpdate(Long id, BikeStatusRequest request) {
+        Bike bike = bikeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("자전거를 찾을 수 없습니다."));
         bike.setStatus(request.getStatus());
         return BikeResponse.from(bike);
     }
@@ -72,8 +80,8 @@ public class BikeService {
 
     // 사용자
     // 자전거 위치별 검색
-    public List<BikeResponse> listLocation() {
-        return bikeRepository.findByLocationOrderByCreatedAtDesc().stream().map(BikeResponse::from).toList();
+    public List<BikeResponse> listLocation(BikeLocation location) {
+        return bikeRepository.findByLocationOrderByCreatedAtDesc(location).stream().map(BikeResponse::from).toList();
     }
     // 자전거 상세 보기
     public BikeResponse detail(Long id) {

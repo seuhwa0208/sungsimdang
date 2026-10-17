@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -30,10 +31,10 @@ public class AdminRestController {
     @GetMapping("/members")
     @ResponseStatus(HttpStatus.OK)
     public List<MemberResponse> findAll(HttpSession session) {
-        if(!isAdmin(session)) {
-            throw new IllegalArgumentException("관리자 계정 권한입니다.");
+        if (!isAdmin(session)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한이 필요합니다.");
         }
-        return memberService.findAll().stream().map(MemberResponse::from).toList();
+        return memberService.findAll();
     }
 
     //회원 상세
@@ -41,61 +42,64 @@ public class AdminRestController {
     @GetMapping("/members/{id}")
     @ResponseStatus(HttpStatus.OK)
     public MemberResponse findById(@PathVariable("id") Long id, HttpSession session) {
-        if(!isAdmin(session)) {
-            throw new IllegalArgumentException("관리자 계정 권한입니다.");
+        if (!isAdmin(session)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한이 필요합니다.");
         }
-        return MemberResponse.from(memberService.findById(id));
+        return memberService.findById(id);
     }
     //loginId로 조회
     @GetMapping("/members/login-id/{loginId}")
     @ResponseStatus(HttpStatus.OK)
     public MemberResponse findByLoginId(@PathVariable("loginId") String loginId, HttpSession session) {
-        if(!isAdmin(session)) {
-            throw new IllegalArgumentException("관리자 계정 권한입니다.");
+        if (!isAdmin(session)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한이 필요합니다.");
         }
-        return MemberResponse.from(memberService.findByLoginId(loginId));
+        return memberService.findByLoginId(loginId);
     }
 
     //회원 정보 수정
     @PutMapping("/members/{id}/update")
     @ResponseStatus(HttpStatus.OK)
     public MemberResponse update(@PathVariable("id")Long id,@Valid @RequestBody MemberUpdateRequest request, HttpSession session) {
-        if(!isAdmin(session)) {
-            throw new IllegalArgumentException("관리자 계정 권한입니다.");
+        if (!isAdmin(session)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한이 필요합니다.");
         }
-        return MemberResponse.from(memberService.update(id, request));
+        return memberService.update(id, request);
     }
     //회원 활성화
     @PatchMapping("/members/{id}/activate")
+    @ResponseStatus(HttpStatus.OK)
     public void activate(@PathVariable("id")Long id, HttpSession session) {
-        if(!isAdmin(session)) {
-            throw new IllegalArgumentException("관리자 계정 권한입니다.");
+        if (!isAdmin(session)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한이 필요합니다.");
         }
         memberService.activate(id);
     }
 
     //회원 비활성화
     @PatchMapping("/members/{id}/inactivate")
+    @ResponseStatus(HttpStatus.OK)
     public void inActivate(@PathVariable("id")Long id, HttpSession session) {
-        if(!isAdmin(session)) {
-            throw new IllegalArgumentException("관리자 계정 권한입니다.");
+        if (!isAdmin(session)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한이 필요합니다.");
         }
-        Member target = memberService.findById(id);
+        MemberResponse target = memberService.findById(id);
         if(target.getRole() == MemberRole.ADMIN) {
-            throw new IllegalArgumentException("관리자 계정은 비활성화 할 수 없습니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 계정은 정지시킬 수 없습니다.");
         }
         memberService.inActivate(id);
     }
 
     //회원 강퇴
     @PatchMapping("/members/{id}/kick")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void kicked(@PathVariable("id")Long id, HttpSession session) {
-        if(!isAdmin(session)) {
-            throw new IllegalArgumentException("관리자 계정 권한입니다.");
+        if (!isAdmin(session)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한이 필요합니다.");
         }
-        Member target = memberService.findById(id);
+        MemberResponse target = memberService.findById(id);
         if(target.getRole() == MemberRole.ADMIN) {
-            throw new IllegalArgumentException("관리자 계정은 강퇴 할 수 없습니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 계정은 강퇴할 수 없습니다.");
         }
         memberService.kicked(id);
     }
@@ -103,8 +107,8 @@ public class AdminRestController {
     @PatchMapping("/members/{id}/role")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeRole(@PathVariable("id")Long id, @Valid @RequestBody MemberRoleUpdateRequest request, HttpSession session) {
-        if(!isAdmin(session)) {
-            throw new IllegalArgumentException("관리자 계정 권한입니다.");
+        if (!isAdmin(session)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한이 필요합니다.");
         }
         memberService.role(id, request);
     }

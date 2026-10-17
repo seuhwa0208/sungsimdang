@@ -31,7 +31,6 @@ public class QnaRestController {
         Member member = (Member) session.getAttribute("loginMember");
         return member != null && member.getRole() == MemberRole.ADMIN;
     }
-
     //로그인한 회원이 관리자인지 확인하는 것 - 에러 코드 분류용
     private void requireAdmin(HttpSession session) {
         if (!isLogin(session)) {
@@ -83,7 +82,7 @@ public class QnaRestController {
     @ResponseStatus(HttpStatus.OK)
     public QnaResponse update(@PathVariable("qnaId") Long qnaId, @Valid @RequestBody QnaRequest request, HttpSession session) {
         if(!isLogin(session)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 또는 매니저 권한이 필요합니다.");
         }
         Member member = (Member) session.getAttribute("loginMember");
 

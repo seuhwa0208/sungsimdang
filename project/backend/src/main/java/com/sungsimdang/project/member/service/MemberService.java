@@ -21,7 +21,7 @@ public class MemberService {
 
     //회원가입
     @Transactional
-    public Member register(SignupRequest request) {
+    public MemberResponse register(SignupRequest request) {
         Member member = new Member();
         //이미 사용 중인 아이디인지 확인
         if(memberRepository.existsByLoginId(request.getLoginId())) {
@@ -58,7 +58,7 @@ public class MemberService {
         //상태 값의 기본값 지정
         member.setStatus(MemberStatus.ACTIVE);
         //가입정보 리턴
-        return memberRepository.save(member);
+        return MemberResponse.from(memberRepository.save(member));
     }
     //로그인
     @Transactional
@@ -81,21 +81,21 @@ public class MemberService {
     }
 
     //id로 회원 조회
-    public Member findById(Long id) {
-        return memberRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("회원 정보를 확인해 주세요."));
+    public MemberResponse findById(Long id) {
+        return MemberResponse.from(memberRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("회원 정보를 확인해 주세요.")));
     }
     //loginId로 조회 - 마이 페이지, 관리자의 회원 상세 정보 보기
-    public Member findByLoginId(String loginId) {
-        return memberRepository.findByLoginId(loginId).orElseThrow(() -> new IllegalArgumentException("회원 정보를 확인해 주세요"));
+    public MemberResponse findByLoginId(String loginId) {
+        return MemberResponse.from(memberRepository.findByLoginId(loginId).orElseThrow(() -> new IllegalArgumentException("회원 정보를 확인해 주세요")));
     }
     //회원 목록 - 관리자
-    public List<Member> findAll() {
-        return memberRepository.findAllByOrderByIdDesc();
+    public List<MemberResponse> findAll() {
+        return memberRepository.findAllByOrderByIdDesc().stream().map(MemberResponse::from).toList();
     }
     //회원 정보 수정
     @Transactional
-    public Member update(Long id, MemberUpdateRequest request) {
-        Member member = findById(id);
+    public MemberResponse update(Long id, MemberUpdateRequest request) {
+        Member member = memberRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
         //이름 수정
         if(request.getName() != null) {
             if(request.getName().isBlank()) {
@@ -117,12 +117,12 @@ public class MemberService {
         if(request.getTel() != null) {
             member.setTel(request.getTel());
         }
-        return member;
+        return MemberResponse.from(member);
     }
     //비밀번호 수정
     @Transactional
-    public Member passwordChange(Long id, PasswordChangeRequest request) {
-        Member member = findById(id);
+    public MemberResponse passwordChange(Long id, PasswordChangeRequest request) {
+        Member member = memberRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
         //현재 비밀번호 입력 여부
         if(request.getPassword() == null || request.getPassword().isBlank()) {
             throw new IllegalArgumentException("사용 중인 비밀번호를 입력해 주세요");
@@ -142,29 +142,29 @@ public class MemberService {
         //비밀번호 변경
         member.setPassword(passwordEncoder.encode(request.getNewPassword()));
 
-        return member;
+        return MemberResponse.from(member);
     }
 
     //회원 탈퇴
     @Transactional
     public void inActive(Long id) {
-        Member member = findById(id);
+        Member member = memberRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
         member.setStatus(MemberStatus.INACTIVE);
     }
     //관리자 - 회원 활성화/비활성화/강퇴
     @Transactional
     public void activate(Long id) {
-        Member member = findById(id);
+        Member member = memberRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
         member.setStatus(MemberStatus.ACTIVE);
     }
     @Transactional
     public void inActivate(Long id) {
-        Member member = findById(id);
+        Member member = memberRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
         member.setStatus(MemberStatus.INACTIVE);
     }
     @Transactional
     public void kicked(Long id) {
-        Member member = findById(id);
+        Member member = memberRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
         member.setStatus(MemberStatus.KICKED);
     }
 
@@ -174,7 +174,7 @@ public class MemberService {
         if(request == null || request.getRole() == null) {
             throw new IllegalArgumentException("변경할 역햘을 선택해 주세요");
         }
-        Member member = findById(id);
+        Member member = memberRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
         member.setRole(request.getRole());
     }
 }
