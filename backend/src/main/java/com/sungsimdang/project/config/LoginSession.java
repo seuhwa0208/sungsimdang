@@ -28,6 +28,10 @@ public class LoginSession {
         return "ADMIN".equals(session.getAttribute(MEMBER_ROLE));
     }
 
+    public static boolean isManager(HttpSession session) {
+        return "MANAGER".equals(session.getAttribute(MEMBER_ROLE));
+    }
+
     public static boolean isLoggedIn(HttpSession session) {
         return memberId(session) != null;
     }

@@ -1,9 +1,6 @@
 package com.sungsimdang.project.facility.service;
 
-import com.sungsimdang.project.facility.domain.Facility;
-import com.sungsimdang.project.facility.domain.FacilityFaultType;
-import com.sungsimdang.project.facility.domain.FacilityMaintenance;
-import com.sungsimdang.project.facility.domain.FacilityType;
+import com.sungsimdang.project.facility.domain.*;
 import com.sungsimdang.project.facility.dto.FacilityMaintenanceResponse;
 import com.sungsimdang.project.facility.dto.FacilityResponse;
 import com.sungsimdang.project.facility.repository.FacilityMaintenanceRepository;
@@ -22,6 +19,7 @@ import java.util.List;
 public class FacilityService {
     private final FacilityRepository facilityRepository;
     private final FacilityMaintenanceRepository facilityMaintenanceRepository;
+    private final MemberRepository memberRepository;
 
     // 목록
     public List<FacilityResponse> findAll(){
@@ -30,13 +28,14 @@ public class FacilityService {
 
     //
     public Facility findById(Long id){
-        return facilityRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("시설에 관한 정보가 없습니다."));
+        return facilityRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("시설을 찾을 수 없습니다."));
     }
 
 //    //검색
 //    public List<FacilityResponse> findByKeyword (String facilityNo) {
 //        return facilityRepository.findByFacilityNoContainingOrderByCreatedAtDesc(facilityNo).stream().map(FacilityResponse::from).toList();
 //    }
+
     //위치 검색으로 시설 목록 불러오기
     public List<FacilityResponse> findByLocationList (String location){
         return facilityRepository.findByLocationOrderByCreatedAtDesc(location).stream().map(FacilityResponse::from).toList();
@@ -54,9 +53,8 @@ public class FacilityService {
 
     //등록
     @Transactional
-    public FacilityResponse register(String facilityNo, String location, FacilityType facilityType){
+    public FacilityResponse register(String location, FacilityType facilityType){
         Facility facility = Facility.builder()
-                .facilityNo(facilityNo)
                 .location(location)
                 .facilityType(facilityType)
                 .build();
@@ -79,9 +77,14 @@ public class FacilityService {
         facilityRepository.delete(facility);
     }
     
-    // 시설 점검 - 등록
+    // 시설 고장 접수 기능 maintenance
+    // 시설 점검 - 등록 - 하면 facility 상태값 변화해야함
     @Transactional
-    public FacilityMaintenanceResponse createMaintenance(Facility facility, Member member, FacilityFaultType facilityFaultType){
+    public FacilityMaintenanceResponse reportMaintenance(Long facilityId, Long memberId, FacilityFaultType facilityFaultType){
+        Facility facility = findById(facilityId);
+        Member member = memberRepository.findById(memberId).orElseThrow(()->new IllegalArgumentException("아이디가 올바르지 않습니다."));
+        if (facility.getFacilityStatus() != FacilityStatus.UNAVAILABLE) {throw new IllegalStateException("상태가 올바르지 않습니다.");}
+        facility.setFacilityStatus(FacilityStatus.REPAIRING);
         FacilityMaintenance facilityMaintenance = FacilityMaintenance.builder()
                 .facility(facility)
                 .member(member)
@@ -91,7 +94,26 @@ public class FacilityService {
     }
 
     // 시설 점검 - 최신순 정렬
-    public List<FacilityMaintenanceResponse> findAllOrderByCreatedAt () {
+    public List<FacilityMaintenanceResponse> maintenanceOrderByCreatedAt () {
         return facilityMaintenanceRepository.findAllByOrderByCreatedAtDesc().stream().map(FacilityMaintenanceResponse::from).toList();
+    }
+
+    // 상태 변화가 Repairing -> Available 되면 자동으로 점검 이력에 history가 남음
+    @Transactional
+    public FacilityMaintenanceResponse repairingCompleted(Long facilityId, Long memberId){
+        Facility facility = findById(facilityId);
+        if (facility.getFacilityStatus() != FacilityStatus.REPAIRING) {throw new IllegalStateException("상태가 올바르지 않습니다.");}
+        Member member = memberRepository.findById(memberId).orElseThrow(()->new IllegalArgumentException("아이디가 올바르지 않습니다."));
+
+        FacilityMaintenance preMaintenance = facilityMaintenanceRepository.findByFacility_IdAndFacilityStatusOrderByCreatedAtDesc(
+                facilityId, FacilityStatus.REPAIRING).orElseThrow(()->new IllegalStateException("상태가 올바르지 않습니다."));
+
+        facility.setFacilityStatus(FacilityStatus.AVAILABLE);
+        FacilityMaintenance facilityMaintenance = FacilityMaintenance.builder()
+                .facility(facility)
+                .member(member)
+                .facilityFaultType(preMaintenance.getFacilityFaultType())
+                .build();
+        return FacilityMaintenanceResponse.from(facilityMaintenanceRepository.save(facilityMaintenance));
     }
 }

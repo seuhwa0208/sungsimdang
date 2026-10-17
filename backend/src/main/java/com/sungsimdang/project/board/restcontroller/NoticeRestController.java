@@ -36,11 +36,16 @@ public class NoticeRestController {
         return noticeService.findByNotice(id);
     }
     
+    // 공지사항 등록 수정 삭제는 관리자만 가능 - 권한 검사
+    public void checkLoginAndAdmin(HttpSession session){
+        if (!LoginSession.isLoggedIn(session)) {throw new AccessDeniedException("로그인을 해주세요.");}
+        if (!LoginSession.isAdmin(session)) {throw new AccessDeniedException("잘못된 접근 입니다.");}
+    }
+    
     //공지사항 등록 -- 로그인 되었는지, 관리자인지
     @PostMapping
     public NoticeResponse create(@Valid @RequestBody NoticeRequest request, HttpSession session){
-        if (!LoginSession.isLoggedIn(session)) throw new AccessDeniedException("로그인을 해주세요.");
-        if (!LoginSession.isAdmin(session)) throw new AccessDeniedException("잘못된 접근 입니다.");
+        checkLoginAndAdmin(session);
         Long memberId = LoginSession.memberId(session);
         return noticeService.create(request.getTitle(),request.getContent(),memberId);
     }
@@ -48,8 +53,7 @@ public class NoticeRestController {
     //공지사항 수정
     @PutMapping("/{id}")
     public NoticeResponse update(@PathVariable("id")Long id,@Valid @RequestBody NoticeRequest request, HttpSession session){
-        if (!LoginSession.isLoggedIn(session)) throw new AccessDeniedException("로그인을 해주세요.");
-        if (!LoginSession.isAdmin(session)) throw new AccessDeniedException("잘못된 접근 입니다.");
+        checkLoginAndAdmin(session);
         Long memberId = LoginSession.memberId(session);
         return noticeService.update(id,request.getTitle(),request.getContent(),memberId);
     }
@@ -57,8 +61,7 @@ public class NoticeRestController {
     //공지사항 삭제
     @DeleteMapping("/{id}")
     public void delete(@PathVariable("id")Long id, HttpSession session){
-        if (!LoginSession.isLoggedIn(session)) throw new AccessDeniedException("로그인을 해주세요.");
-        if (!LoginSession.isAdmin(session)) throw new AccessDeniedException("잘못된 접근 입니다.");
+        checkLoginAndAdmin(session);
         noticeService.delete(id);
     }
 }

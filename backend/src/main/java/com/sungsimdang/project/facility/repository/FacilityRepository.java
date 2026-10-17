@@ -10,6 +10,6 @@ import java.util.List;
 public interface FacilityRepository extends JpaRepository<Facility, Long> {
     List<Facility> findAllByOrderByCreatedAtDesc();
     List<Facility> findAllByOrderByFacilityStatusDesc();
-    List<Facility> findByFacilityNoContainingOrderByCreatedAtDesc(String facilityNo);
+    //List<Facility> findByFacilityNoContainingOrderByCreatedAtDesc(String facilityNo);
     List<Facility> findByLocationOrderByCreatedAtDesc(String location);
 }

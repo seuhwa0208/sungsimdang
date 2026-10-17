@@ -36,29 +36,32 @@ public class DataFilesRestController {
         return dataFilesService.findByDataFiles(id);
     }
 
-    //공지사항 등록 -- 로그인 되었는지, 관리자인지
+    // 자료실 등록 수정 삭제는 관리자만 가능 - 권한 검사
+    public void checkLoginAndAdmin(HttpSession session){
+        if (!LoginSession.isLoggedIn(session)) {throw new AccessDeniedException("로그인을 해주세요.");}
+        if (!LoginSession.isAdmin(session)) {throw new AccessDeniedException("잘못된 접근 입니다.");}
+    }
+
+    //자료실 등록 -- 로그인 되었는지, 관리자인지
     @PostMapping
     public DataFilesResponse create(@Valid @RequestBody DataFilesRequest request, HttpSession session){
-        if (!LoginSession.isLoggedIn(session)) throw new AccessDeniedException("로그인을 해주세요.");
-        if (!LoginSession.isAdmin(session)) throw new AccessDeniedException("잘못된 접근 입니다.");
+        checkLoginAndAdmin(session);
         Long memberId = LoginSession.memberId(session);
         return dataFilesService.create(request.getTitle(),request.getContent(),memberId);
     }
 
-    //공지사항 수정
+    //자료실 수정
     @PutMapping("/{id}")
     public DataFilesResponse update(@PathVariable("id")Long id,@Valid @RequestBody DataFilesRequest request, HttpSession session){
-        if (!LoginSession.isLoggedIn(session)) throw new AccessDeniedException("로그인을 해주세요.");
-        if (!LoginSession.isAdmin(session)) throw new AccessDeniedException("잘못된 접근 입니다.");
+        checkLoginAndAdmin(session);
         Long memberId = LoginSession.memberId(session);
         return dataFilesService.update(id,request.getTitle(),request.getContent(),memberId);
     }
 
-    //공지사항 삭제
+    //자료실 삭제
     @DeleteMapping("/{id}")
     public void delete(@PathVariable("id")Long id, HttpSession session){
-        if (!LoginSession.isLoggedIn(session)) throw new AccessDeniedException("로그인을 해주세요.");
-        if (!LoginSession.isAdmin(session)) throw new AccessDeniedException("잘못된 접근 입니다.");
+        checkLoginAndAdmin(session);
         dataFilesService.delete(id);
     }
 }
