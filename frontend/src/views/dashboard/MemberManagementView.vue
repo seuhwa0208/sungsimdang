@@ -1,13 +1,11 @@
 <template>
   <div>
-    <PageHeader title="회원 관리" description="회원의 권한과 상태를 관리합니다. 비활성화(INACTIVE)는 삭제가 아닌 소프트 삭제입니다." />
+    <ManageToolbar v-model="list.keyword.value" title="회원 관리" keyword-label="회원 번호" keyword-placeholder="회원 검색" @search="list.search">
+      <div class="w-32"><BaseSelect v-model="role" :options="roleOptions" placeholder="전체" label="권한" /></div>
+      <div class="w-28"><BaseSelect v-model="status" :options="statusOptions" placeholder="전체" label="상태" /></div>
+    </ManageToolbar>
 
     <p v-if="notice" class="mb-3 rounded-md bg-green-50 p-3 text-sm text-green-800" role="status">{{ notice }}</p>
-
-    <ListToolbar v-model="list.keyword.value" placeholder="아이디·이름·이메일 검색" @search="list.search" @reset="list.reset(resetFilters)">
-      <div class="w-36"><BaseSelect v-model="role" :options="roleOptions" placeholder="전체 권한" label="권한" /></div>
-      <div class="w-36"><BaseSelect v-model="status" :options="statusOptions" placeholder="전체 상태" label="상태" /></div>
-    </ListToolbar>
 
     <LoadingState v-if="list.loading.value" />
     <ErrorState v-else-if="list.error.value" :error="list.error.value" @retry="list.load" />
@@ -56,11 +54,10 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import PageHeader from '../../components/common/PageHeader.vue'
+import ManageToolbar from '../../components/common/ManageToolbar.vue'
 import BaseButton from '../../components/common/BaseButton.vue'
 import BaseSelect from '../../components/common/BaseSelect.vue'
 import BaseModal from '../../components/common/BaseModal.vue'
-import ListToolbar from '../../components/common/ListToolbar.vue'
 import LoadingState from '../../components/common/LoadingState.vue'
 import ErrorState from '../../components/common/ErrorState.vue'
 import EmptyState from '../../components/common/EmptyState.vue'
@@ -80,13 +77,9 @@ const role = ref('')
 const status = ref('')
 const roleOptions = toOptions(memberRoleLabels)
 const statusOptions = toOptions(memberStatusLabels)
-const resetFilters = () => {
-  role.value = ''
-  status.value = ''
-}
 // 비밀번호/해시는 DTO(MemberResponse)에 없으며 화면 어디에도 표시하지 않는다.
 const list = useListView((p) => adminMemberService.list(p), {
-  searchFields: (m) => [m.loginId, m.name, m.email],
+  searchFields: (m) => [m.id, m.loginId, m.name, m.email],
   predicate: (m) => (!role.value || m.role === role.value) && (!status.value || m.status === status.value),
   sort: (a, b) => (b.id ?? 0) - (a.id ?? 0),
   watchSources: [role, status],

@@ -12,24 +12,62 @@
     <section class="grid gap-6 lg:grid-cols-2">
       <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
         <div class="flex items-center justify-between"><h2 class="text-lg font-bold">타슈 운영 현황</h2><RouterLink to="/bikes" class="text-sm text-brand-600 hover:underline">더보기 〉</RouterLink></div>
-        <p class="mt-1 text-sm text-gray-500">대전 공공자전거 ‘타슈’의 이용 현황을 확인할 수 있습니다.</p>
-        <p v-if="bikes.error" class="mt-6 text-center text-sm text-gray-500">현황을 불러오지 못했습니다.</p>
-        <div v-else class="mt-5 grid grid-cols-3 gap-3 text-center">
-          <div v-for="s in bikeStats" :key="s.key" class="rounded-md bg-gray-50 p-4">
-            <p class="text-xs text-gray-500">{{ s.label }}</p>
-            <p class="mt-1 text-2xl font-bold">{{ bikes.loading ? '…' : s.count }}<span class="ml-0.5 text-sm font-normal text-gray-500">대</span></p>
+        <div class="mt-5 grid grid-cols-3 gap-3">
+          <div v-for="s in bikeStats" :key="s.key" class="rounded-xl bg-sky-100 px-4 py-3">
+            <p class="text-sm text-gray-800">{{ s.label }}</p>
+            <div class="mt-1 flex items-center justify-between gap-2">
+              <p class="text-xl font-bold text-gray-900">{{ bikes.loading ? '…' : bikes.error ? '-' : s.count }}대</p>
+              <StatIcon :name="s.icon" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 서비스 안내 / 이용안내 (타슈 운영 현황 카드 안쪽) -->
+        <div class="mt-6 border-t border-gray-100 pt-5" role="group" aria-label="이용안내">
+
+          <div class="mt-4 flex items-start gap-4">
+            <svg class="h-14 w-14 shrink-0" viewBox="0 0 80 80" fill="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="guide-clock-grad" x1="10" y1="8" x2="70" y2="72" gradientUnits="userSpaceOnUse">
+                  <stop offset="0" stop-color="#4cc3ff" />
+                  <stop offset="1" stop-color="#1a6fe0" />
+                </linearGradient>
+              </defs>
+              <circle cx="40" cy="40" r="38" fill="url(#guide-clock-grad)" />
+              <circle cx="40" cy="40" r="29" fill="#fff" />
+              <g stroke="#1f2937" stroke-width="2.5" stroke-linecap="round">
+                <path d="M40 15v5M40 60v5M15 40h5M60 40h5" />
+                <path d="M40 40V26" />
+                <path d="M40 40l10 8" />
+              </g>
+              <circle cx="40" cy="40" r="2.5" fill="#1f2937" />
+            </svg>
+
+            <div class="min-w-0">
+              <h4 class="text-base font-bold text-brand-600">이용안내</h4>
+              <dl class="mt-2 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm text-gray-700">
+                <dt class="font-bold">이용대상</dt>
+                <dd>만 15세 이상 자전거 주행이 가능한 자</dd>
+                <dt class="font-bold">대여시간</dt>
+                <dd>05시 ~ 24시</dd>
+                <dt class="font-bold">반납시간</dt>
+                <dd>24시간</dd>
+              </dl>
+              <p class="mt-2 text-sm leading-6 text-gray-600">※ 이용 성수기인 3월부터 11월까지는 24시간 운영합니다.</p>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
         <div class="flex items-center justify-between"><h2 class="text-lg font-bold">기반시설 현황</h2><RouterLink to="/facilities" class="text-sm text-brand-600 hover:underline">더보기 〉</RouterLink></div>
-        <p class="mt-1 text-sm text-gray-500">엘리베이터, 스크린도어 등 시설의 현황을 확인할 수 있습니다.</p>
-        <p v-if="facilities.error" class="mt-6 text-center text-sm text-gray-500">현황을 불러오지 못했습니다.</p>
-        <div v-else class="mt-5 grid grid-cols-3 gap-3 text-center">
-          <div v-for="s in facilityStats" :key="s.key" class="rounded-md bg-gray-50 p-4">
-            <p class="text-xs text-gray-500">{{ s.label }}</p>
-            <p class="mt-1 text-2xl font-bold">{{ facilities.loading ? '…' : s.count }}<span class="ml-0.5 text-sm font-normal text-gray-500">개</span></p>
+        <div class="mt-5 grid grid-cols-3 gap-3">
+          <div v-for="s in facilityStats" :key="s.key" class="rounded-xl bg-sky-100 px-4 py-3">
+            <p class="text-sm text-gray-800">{{ s.label }}</p>
+            <div class="mt-1 flex items-center justify-between gap-2">
+              <p class="text-xl font-bold text-gray-900">{{ facilities.loading ? '…' : facilities.error ? '-' : s.count }}개</p>
+              <StatIcon :name="s.icon" />
+            </div>
           </div>
         </div>
         <ul v-if="typeStats.length" class="mt-4 divide-y divide-gray-100 text-sm">
@@ -42,7 +80,6 @@
     <section class="grid gap-6 lg:grid-cols-2">
       <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
         <div class="flex items-center justify-between"><h2 class="text-lg font-bold">최근 공지사항</h2><RouterLink to="/notices" class="text-sm text-brand-600 hover:underline">더보기 〉</RouterLink></div>
-        <p class="mt-1 text-sm text-gray-500">대전교통공사의 주요 소식을 확인할 수 있습니다.</p>
         <LoadingState v-if="notices.loading" />
         <p v-else-if="notices.error" class="py-8 text-center text-sm text-gray-500">공지사항을 불러오지 못했습니다.</p>
         <EmptyState v-else-if="!recentNotices.length" title="등록된 공지사항이 없습니다." />
@@ -57,7 +94,6 @@
 
       <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
         <div class="flex items-center justify-between"><h2 class="text-lg font-bold">Q&amp;A</h2><RouterLink to="/qna" class="text-sm text-brand-600 hover:underline">더보기 〉</RouterLink></div>
-        <p class="mt-1 text-sm text-gray-500">자주 찾는 질문</p>
         <LoadingState v-if="qna.loading" />
         <p v-else-if="qna.error" class="py-8 text-center text-sm text-gray-500">Q&amp;A를 불러오지 못했습니다.</p>
         <EmptyState v-else-if="!recentQna.length" title="등록된 질문이 없습니다." />
@@ -77,6 +113,7 @@
 import { computed } from 'vue'
 import LoadingState from '../../components/common/LoadingState.vue'
 import EmptyState from '../../components/common/EmptyState.vue'
+import StatIcon from '../../components/common/StatIcon.vue'
 import { useAsyncData } from '../../composables/useAsyncData'
 import { bikeService } from '../../services/bikeService'
 import { facilityService } from '../../services/facilityService'
@@ -84,23 +121,32 @@ import { noticeService } from '../../services/noticeService'
 import { qnaService } from '../../services/qnaService'
 import { normalizeList } from '../../utils/list'
 import { formatDate } from '../../utils/formatDate'
-import { bikeStatusLabels, facilityStatusLabels, facilityTypeLabels, labelOf } from '../../utils/statusLabels'
+import { facilityTypeLabels, labelOf } from '../../utils/statusLabels'
 
 // 각 영역은 독립적으로 조회한다. 한 곳이 실패해도 나머지는 그대로 표시된다.
-const bikes = useAsyncData(() => bikeService.list())
-const facilities = useAsyncData(() => facilityService.list())
+// 메인 화면은 사용자용 엔드포인트(/api/bike/member, /api/facilities/member)를 사용한다.
+const bikes = useAsyncData(() => bikeService.memberList())
+const facilities = useAsyncData(() => facilityService.memberList())
 const notices = useAsyncData(() => noticeService.list())
 const qna = useAsyncData(() => qnaService.list())
 
 const itemsOf = (src) => normalizeList(src.data.value).items
 const newest = (arr) => [...arr].sort((a, b) => (b.id ?? 0) - (a.id ?? 0)).slice(0, 5)
 
-const bikeStats = computed(() =>
-  ['AVAILABLE', 'REPAIRING', 'UNAVAILABLE'].map((key) => ({ key, label: bikeStatusLabels[key], count: itemsOf(bikes).filter((b) => b.status === key).length })),
-)
-const facilityStats = computed(() =>
-  ['AVAILABLE', 'REPAIRING', 'UNAVAILABLE'].map((key) => ({ key, label: facilityStatusLabels[key], count: itemsOf(facilities).filter((f) => f.facilityStatus === key).length })),
-)
+// 와이어프레임 메인 화면 카드 순서·문구·아이콘을 따른다.
+// 시설의 '점검중'은 REPAIRING, '수리 중'은 UNAVAILABLE 로 매핑했다.
+const BIKE_CARDS = [
+  { key: 'AVAILABLE', label: '이용가능 자전거', icon: 'bike' },
+  { key: 'REPAIRING', label: '정비중', icon: 'wrench' },
+  { key: 'UNAVAILABLE', label: '운영중지', icon: 'ban' },
+]
+const FACILITY_CARDS = [
+  { key: 'AVAILABLE', label: '정상 시설', icon: 'building' },
+  { key: 'REPAIRING', label: '점검중', icon: 'wrench' },
+  { key: 'UNAVAILABLE', label: '수리 중', icon: 'ban' },
+]
+const bikeStats = computed(() => BIKE_CARDS.map((c) => ({ ...c, count: itemsOf(bikes).filter((b) => b.status === c.key).length })))
+const facilityStats = computed(() => FACILITY_CARDS.map((c) => ({ ...c, count: itemsOf(facilities).filter((f) => f.facilityStatus === c.key).length })))
 const typeStats = computed(() => {
   const counts = {}
   itemsOf(facilities).forEach((f) => (counts[f.facilityType] = (counts[f.facilityType] || 0) + 1))

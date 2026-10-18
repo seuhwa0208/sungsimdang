@@ -69,5 +69,12 @@ export const statusTone = {
   KICKED: 'red',
 }
 
+// 대시보드에서 상태 배지를 누를 때 순환하는 순서: 이용가능 → 운영중지 → 정비중 → (다시) 이용가능
+export const STATUS_ROTATION = ['AVAILABLE', 'UNAVAILABLE', 'REPAIRING']
+// 회원 상태 배지는 활성 ↔ 비활성만 오간다. (강퇴는 이 목록에 없어 배지를 눌러도 바뀌지 않는다)
+export const MEMBER_ROTATION = ['ACTIVE', 'INACTIVE']
+export const nextIn = (rotation, current) => rotation[(rotation.indexOf(current) + 1) % rotation.length]
+export const nextStatus = (current) => nextIn(STATUS_ROTATION, current)
+
 export const toOptions = (labels) => Object.entries(labels).map(([value, label]) => ({ value, label }))
 export const labelOf = (labels, value) => labels[value] ?? value ?? '-'

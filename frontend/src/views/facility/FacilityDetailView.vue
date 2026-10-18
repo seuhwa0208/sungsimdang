@@ -29,5 +29,5 @@ import { facilityTypeLabels, labelOf } from '../../utils/statusLabels'
 
 const props = defineProps({ id: { type: String, required: true } })
 const auth = useAuthStore()
-const { data: facility, loading, error, load } = useAsyncData(() => facilityService.get(props.id))
+const { data: facility, loading, error, load } = useAsyncData(() => facilityService.memberGet(props.id))
 </script>

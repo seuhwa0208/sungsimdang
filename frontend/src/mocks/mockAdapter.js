@@ -4,7 +4,7 @@ import { createSeed } from './mockData'
 
 // axios 어댑터를 교체해 실제 네트워크 대신 메모리 데이터를 응답한다. (npm run dev:mock 에서만 사용)
 // 서비스/화면 코드는 그대로이며, 실제 모드에는 이 파일이 로드되지 않는다.
-// 주의: 아래 동작(이력 INSERT 시 상태 REPAIRING 등)은 Mock 의 가정이며 실제 서버 규칙이 아니다.
+// 경로는 "API 명세서 1차 확정" 기준이다. 아래 동작(이력 INSERT 시 상태 REPAIRING 등)은 Mock 의 가정이며 실제 서버 규칙이 아니다.
 
 const db = createSeed()
 const SESSION_KEY = 'mock-session-member-id'
@@ -37,15 +37,21 @@ const need = (cond, message, field) => {
   if (!cond) fail(400, message, field ? { errors: { [field]: message } } : undefined)
 }
 const isPassword = (v) => typeof v === 'string' && v.length >= 4 && v.length <= 30 && /^(?=.*[A-Za-z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]+$/.test(v)
+const newestFirst = (list) => [...list].sort((a, b) => b.id - a.id)
+const keywordOf = (query) => String(query.keyword ?? query.q ?? query.title ?? query.location ?? '').trim().toLowerCase()
 
-const bikeMtDto = (r) => ({ id: r.id, createdAt: r.createdAt, status: r.status, faultType: r.faultType, memberLoginId: r.memberLoginId })
-const facilityMtDto = (r) => ({ id: r.id, facilityNo: db.facilities.find((f) => f.id === r.facilityId)?.facilityNo, createdAt: r.createdAt, facilityStatus: r.facilityStatus, faultType: r.faultType, memberLoginId: r.memberLoginId })
+const bikeMtDto = (r) => ({ id: r.id, bikeId: r.bikeId, createdAt: r.createdAt, status: r.status, faultType: r.faultType, memberLoginId: r.memberLoginId })
+const facilityMtDto = (r) => ({ id: r.id, facilityId: r.facilityId, facilityNo: db.facilities.find((f) => f.id === r.facilityId)?.facilityNo, createdAt: r.createdAt, facilityStatus: r.facilityStatus, faultType: r.faultType, memberLoginId: r.memberLoginId })
 const qnaDto = ({ memberId, ...q }) => ({ ...q, author: db.members.find((m) => m.id === memberId)?.loginId })
 
-// 게시판(공지/자료실) 공통 CRUD
+// 게시판(공지/자료실) 공통 CRUD + 검색
 function boardRoutes(prefix, key, seqKey) {
   return [
-    ['get', new RegExp(`^/${prefix}$`), () => db[key]],
+    ['get', new RegExp(`^/${prefix}$`), () => newestFirst(db[key])],
+    ['get', new RegExp(`^/${prefix}/search$`), ({ query }) => {
+      const kw = keywordOf(query)
+      return newestFirst(db[key]).filter((r) => !kw || `${r.title} ${r.content}`.toLowerCase().includes(kw))
+    }],
     ['get', new RegExp(`^/${prefix}/(\\d+)$`), ({ p }) => byId(db[key], p[0])],
     ['post', new RegExp(`^/${prefix}$`), ({ body }) => {
       const me = requireRole('ADMIN')
@@ -72,11 +78,14 @@ function boardRoutes(prefix, key, seqKey) {
   ]
 }
 
+const BIKE_STATUSES = ['AVAILABLE', 'UNAVAILABLE', 'REPAIRING']
+const statusRank = { REPAIRING: 0, UNAVAILABLE: 1, AVAILABLE: 2 }
+
 const routes = [
   ['get', /^\/csrf$/, () => ({ token: 'mock-csrf-token', headerName: 'X-CSRF-TOKEN', parameterName: '_csrf' })],
 
-  // ---- 인증/회원 ----
-  ['post', /^\/members\/register$/, ({ body }) => {
+  // ---- /api/members ----
+  ['post', /^\/members\/signup$/, ({ body }) => {
     need(body.loginId?.length >= 4 && body.loginId.length <= 20, '최소 4자에서 최대 20자까지 입력해야 합니다.', 'loginId')
     need(isPassword(body.password), '4자~30자, 영문과 숫자, 1개 이상의 특수문자를 사용해야 합니다.', 'password')
     need(body.password === body.passwordCheck, '비밀번호가 일치하지 않습니다.', 'passwordCheck')
@@ -110,7 +119,7 @@ const routes = [
     Object.assign(me, { name: body.name, email: body.email, tel: body.tel ?? null })
     return memberDto(me)
   }],
-  ['patch', /^\/members\/me\/password$/, ({ body }) => {
+  ['put', /^\/members\/password$/, ({ body }) => {
     const me = requireLogin()
     if (me.password !== body.password) fail(400, '현재 비밀번호가 올바르지 않습니다.', { errors: { password: '현재 비밀번호가 올바르지 않습니다.' } })
     need(isPassword(body.newPassword), '4자~30자, 영문과 숫자, 1개 이상의 특수문자를 사용해야 합니다.', 'newPassword')
@@ -118,62 +127,85 @@ const routes = [
     me.password = body.newPassword
     return null
   }],
-  ['delete', /^\/members\/me\/delete$/, ({ body }) => {
+  ['post', /^\/members\/inactive$/, ({ body }) => {
     const me = requireLogin()
-    if (me.password !== body?.password) fail(400, '비밀번호가 올바르지 않습니다.', { errors: { password: '비밀번호가 올바르지 않습니다.' } })
+    if (body?.password !== undefined && me.password !== body.password) fail(400, '비밀번호가 올바르지 않습니다.', { errors: { password: '비밀번호가 올바르지 않습니다.' } })
     me.status = 'INACTIVE' // 소프트 삭제
     sessionStorage.removeItem(SESSION_KEY)
     return null
   }],
 
-  // ---- 관리자 회원 ----
-  ['get', /^\/admin\/members$/, () => (requireRole('ADMIN'), db.members.map(memberDto))],
-  ['get', /^\/admin\/members\/(\d+)$/, ({ p }) => (requireRole('ADMIN'), memberDto(byId(db.members, p[0])))],
-  ['patch', /^\/admin\/members\/(\d+)\/role$/, ({ p, body }) => {
+  // ---- /api/admin (회원 관리) ----
+  ['get', /^\/admin$/, () => (requireRole('ADMIN'), db.members.map(memberDto))],
+  ['get', /^\/admin\/login-id\/([^/]+)$/, ({ p }) => {
+    requireRole('ADMIN')
+    const m = db.members.find((x) => x.loginId === decodeURIComponent(p[0])) || fail(404, '대상을 찾을 수 없습니다.')
+    return memberDto(m)
+  }],
+  ['get', /^\/admin\/(\d+)$/, ({ p }) => (requireRole('ADMIN'), memberDto(byId(db.members, p[0])))],
+  ['put', /^\/admin\/(\d+)$/, ({ p, body }) => {
+    requireRole('ADMIN')
+    const m = byId(db.members, p[0])
+    need(body.name?.trim(), '이름은 필수입니다.', 'name')
+    need(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email || ''), '올바른 이메일 형식이 아닙니다.', 'email')
+    Object.assign(m, { name: body.name, email: body.email, tel: body.tel ?? m.tel })
+    return memberDto(m)
+  }],
+  ['patch', /^\/admin\/(\d+)\/role$/, ({ p, body }) => {
     requireRole('ADMIN')
     need(['USER', 'MANAGER', 'ADMIN'].includes(body.role), '올바르지 않은 권한입니다.')
     const m = byId(db.members, p[0])
     m.role = body.role
     return memberDto(m)
   }],
-  ['patch', /^\/admin\/members\/(\d+)\/status$/, ({ p, body }) => {
-    requireRole('ADMIN')
-    need(['ACTIVE', 'INACTIVE', 'KICKED'].includes(body.status), '올바르지 않은 상태입니다.')
-    const m = byId(db.members, p[0])
-    m.status = body.status
-    return memberDto(m)
-  }],
+  ...[
+    ['activate', 'ACTIVE'],
+    ['inactivate', 'INACTIVE'],
+    ['kick', 'KICKED'],
+  ].map(([path, status]) => [
+    'patch',
+    new RegExp(`^/admin/(\\d+)/${path}$`),
+    ({ p }) => {
+      requireRole('ADMIN')
+      const m = byId(db.members, p[0])
+      m.status = status
+      return memberDto(m)
+    },
+  ]),
 
-  // ---- 타슈 ----
-  ['get', /^\/bikes$/, () => db.bikes],
-  ['get', /^\/bikes\/(\d+)$/, ({ p }) => byId(db.bikes, p[0])],
-  ['post', /^\/bikes$/, ({ body }) => {
+  // ---- /api/bike ---- (사용자용 /member 경로는 관리자용보다 먼저 선언)
+  ['get', /^\/bike\/member$/, () => newestFirst(db.bikes)],
+  ['get', /^\/bike\/member\/search$/, ({ query }) => {
+    const kw = keywordOf(query)
+    return newestFirst(db.bikes).filter((b) => !kw || b.location.toLowerCase().includes(kw))
+  }],
+  ['get', /^\/bike\/member\/(\d+)$/, ({ p }) => byId(db.bikes, p[0])],
+  ['get', /^\/bike$/, () => (requireRole('MANAGER', 'ADMIN'), newestFirst(db.bikes))],
+  ['get', /^\/bike\/status$/, () => (requireRole('MANAGER', 'ADMIN'), [...db.bikes].sort((a, b) => statusRank[a.status] - statusRank[b.status] || b.id - a.id))],
+  ['get', /^\/bike\/maintenance$/, () => (requireRole('MANAGER', 'ADMIN'), db.bikeMaintenance.map(bikeMtDto))],
+  ['get', /^\/bike\/(\d+)$/, ({ p }) => (requireRole('MANAGER', 'ADMIN'), byId(db.bikes, p[0]))],
+  ['post', /^\/bike$/, ({ body }) => {
     requireRole('MANAGER', 'ADMIN')
     need(body.location?.trim(), '위치는 필수입니다.', 'location')
     const b = { id: db.seq.bike++, location: body.location, status: 'AVAILABLE', distance: 0 }
     db.bikes.push(b)
     return b
   }],
-  ['put', /^\/bikes\/(\d+)$/, ({ p, body }) => {
+  ['put', /^\/bike\/(\d+)$/, ({ p, body }) => {
     requireRole('MANAGER', 'ADMIN')
     need(body.location?.trim(), '위치는 필수입니다.', 'location')
     const b = byId(db.bikes, p[0])
     b.location = body.location
     return b
   }],
-  ['patch', /^\/bikes\/(\d+)\/status$/, ({ p, body }) => {
+  ['delete', /^\/bike\/(\d+)$/, ({ p }) => {
     requireRole('MANAGER', 'ADMIN')
-    need(['AVAILABLE', 'UNAVAILABLE', 'REPAIRING'].includes(body.status), '올바르지 않은 상태입니다.')
     const b = byId(db.bikes, p[0])
-    b.status = body.status
-    return b
+    db.bikes.splice(db.bikes.indexOf(b), 1)
+    db.bikeMaintenance = db.bikeMaintenance.filter((r) => r.bikeId !== b.id)
+    return null
   }],
-  ['get', /^\/bikes\/(\d+)\/maintenance$/, ({ p }) => {
-    requireRole('MANAGER', 'ADMIN')
-    byId(db.bikes, p[0])
-    return db.bikeMaintenance.filter((r) => r.bikeId === Number(p[0])).map(bikeMtDto)
-  }],
-  ['post', /^\/bikes\/(\d+)\/maintenance$/, ({ p, body }) => {
+  ['post', /^\/bike\/(\d+)\/maintenance$/, ({ p, body }) => {
     const me = requireRole('MANAGER', 'ADMIN')
     const b = byId(db.bikes, p[0])
     need(['BRAKE', 'TIRE', 'CHAIN', 'HANDEL', 'SADDLE', 'LOCK'].includes(body.faultType), '올바르지 않은 고장 유형입니다.')
@@ -183,10 +215,30 @@ const routes = [
     db.bikeMaintenance.push(row)
     return bikeMtDto(row)
   }],
+  ['patch', /^\/bike\/(\d+)\/maintenance$/, ({ p, body }) => {
+    requireRole('MANAGER', 'ADMIN')
+    need(BIKE_STATUSES.includes(body.status), '올바르지 않은 상태입니다.')
+    const b = byId(db.bikes, p[0])
+    b.status = body.status
+    return b
+  }],
 
-  // ---- 기반시설 ----
-  ['get', /^\/facilities$/, () => db.facilities],
-  ['get', /^\/facilities\/(\d+)$/, ({ p }) => byId(db.facilities, p[0])],
+  // ---- /api/facilities ----
+  ['get', /^\/facilities\/member$/, () => newestFirst(db.facilities)],
+  ['get', /^\/facilities\/member\/search$/, ({ query }) => {
+    const kw = keywordOf(query)
+    return newestFirst(db.facilities).filter((f) => !kw || f.location.toLowerCase().includes(kw))
+  }],
+  ['get', /^\/facilities\/member\/(\d+)$/, ({ p }) => byId(db.facilities, p[0])],
+  ['get', /^\/facilities$/, () => (requireRole('MANAGER', 'ADMIN'), newestFirst(db.facilities))],
+  ['get', /^\/facilities\/status$/, () => (requireRole('MANAGER', 'ADMIN'), [...db.facilities].sort((a, b) => statusRank[a.facilityStatus] - statusRank[b.facilityStatus] || b.id - a.id))],
+  ['get', /^\/facilities\/search$/, ({ query }) => {
+    requireRole('MANAGER', 'ADMIN')
+    const kw = keywordOf(query)
+    return newestFirst(db.facilities).filter((f) => !kw || f.location.toLowerCase().includes(kw))
+  }],
+  ['get', /^\/facilities\/maintenance$/, () => (requireRole('MANAGER', 'ADMIN'), db.facilityMaintenance.map(facilityMtDto))],
+  ['get', /^\/facilities\/(\d+)$/, ({ p }) => (requireRole('MANAGER', 'ADMIN'), byId(db.facilities, p[0]))],
   ['post', /^\/facilities$/, ({ body }) => {
     requireRole('MANAGER', 'ADMIN')
     need(body.location?.trim(), '위치는 필수입니다.', 'location')
@@ -203,17 +255,12 @@ const routes = [
     Object.assign(f, { location: body.location, facilityType: body.facilityType || f.facilityType })
     return f
   }],
-  ['patch', /^\/facilities\/(\d+)\/status$/, ({ p, body }) => {
+  ['delete', /^\/facilities\/(\d+)$/, ({ p }) => {
     requireRole('MANAGER', 'ADMIN')
-    need(['AVAILABLE', 'UNAVAILABLE', 'REPAIRING'].includes(body.facilityStatus), '올바르지 않은 상태입니다.')
     const f = byId(db.facilities, p[0])
-    f.facilityStatus = body.facilityStatus
-    return f
-  }],
-  ['get', /^\/facilities\/(\d+)\/maintenance$/, ({ p }) => {
-    requireRole('MANAGER', 'ADMIN')
-    byId(db.facilities, p[0])
-    return db.facilityMaintenance.filter((r) => r.facilityId === Number(p[0])).map(facilityMtDto)
+    db.facilities.splice(db.facilities.indexOf(f), 1)
+    db.facilityMaintenance = db.facilityMaintenance.filter((r) => r.facilityId !== f.id)
+    return null
   }],
   ['post', /^\/facilities\/(\d+)\/maintenance$/, ({ p, body }) => {
     const me = requireRole('MANAGER', 'ADMIN')
@@ -224,16 +271,27 @@ const routes = [
     db.facilityMaintenance.push(row)
     return facilityMtDto(row)
   }],
+  ['patch', /^\/facilities\/(\d+)\/maintenance$/, ({ p, body }) => {
+    requireRole('MANAGER', 'ADMIN')
+    need(BIKE_STATUSES.includes(body.facilityStatus), '올바르지 않은 상태입니다.')
+    const f = byId(db.facilities, p[0])
+    f.facilityStatus = body.facilityStatus
+    return f
+  }],
 
   // ---- 게시판 ----
   ...boardRoutes('notices', 'notices', 'notice'),
   ...boardRoutes('datafiles', 'dataFiles', 'dataFile'),
 
-  // ---- Q&A ----
-  ['get', /^\/qna$/, () => db.qna.map(qnaDto)],
-  ['get', /^\/qna\/me$/, () => {
+  // ---- /api/qna ---- (/my, /admin 은 /{qnaId} 보다 먼저 선언)
+  ['get', /^\/qna$/, () => newestFirst(db.qna).map(qnaDto)],
+  ['get', /^\/qna\/my$/, () => {
     const me = requireLogin()
-    return db.qna.filter((q) => q.memberId === me.id).map(qnaDto)
+    return newestFirst(db.qna.filter((q) => q.memberId === me.id)).map(qnaDto)
+  }],
+  ['get', /^\/qna\/admin$/, () => {
+    requireRole('ADMIN')
+    return newestFirst(db.qna.filter((q) => q.status === 'WAITING')).map(qnaDto)
   }],
   ['get', /^\/qna\/(\d+)$/, ({ p }) => {
     const q = byId(db.qna, p[0])
@@ -258,8 +316,21 @@ const routes = [
     Object.assign(q, { title: body.title, content: body.content, updatedAt: now() })
     return qnaDto(q)
   }],
-  ['post', /^\/qna\/(\d+)\/answer$/, ({ p, body }) => answerQna(p[0], body)],
-  ['put', /^\/qna\/(\d+)\/answer$/, ({ p, body }) => answerQna(p[0], body)],
+  ['delete', /^\/qna\/(\d+)$/, ({ p }) => {
+    const me = requireLogin()
+    const q = byId(db.qna, p[0])
+    if (q.memberId !== me.id && me.role !== 'ADMIN') fail(403, '본인의 질문만 삭제할 수 있습니다.')
+    db.qna.splice(db.qna.indexOf(q), 1)
+    return null
+  }],
+  ['post', /^\/qna\/admin\/(\d+)$/, ({ p, body }) => answerQna(p[0], body)],
+  ['put', /^\/qna\/admin\/(\d+)$/, ({ p, body }) => answerQna(p[0], body)],
+  ['delete', /^\/qna\/admin\/(\d+)$/, ({ p }) => {
+    requireRole('ADMIN')
+    const q = byId(db.qna, p[0])
+    Object.assign(q, { answer: null, status: 'WAITING', answeredAt: null, updatedAt: now() })
+    return null
+  }],
 ]
 
 function answerQna(id, body) {

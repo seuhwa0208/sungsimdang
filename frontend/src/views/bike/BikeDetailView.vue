@@ -29,5 +29,5 @@ import { formatBikeId, formatDistance } from '../../utils/format'
 
 const props = defineProps({ id: { type: String, required: true } })
 const auth = useAuthStore()
-const { data: bike, loading, error, load } = useAsyncData(() => bikeService.get(props.id))
+const { data: bike, loading, error, load } = useAsyncData(() => bikeService.memberGet(props.id))
 </script>

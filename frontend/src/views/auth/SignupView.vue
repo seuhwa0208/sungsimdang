@@ -1,6 +1,7 @@
 <template>
   <div class="mx-auto max-w-lg rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-200">
-    <h1 class="mb-6 text-2xl font-bold">회원가입</h1>
+    <h1 class="text-center text-2xl font-bold">회원가입</h1>
+    <p class="mb-6 mt-2 text-center text-sm text-gray-600">회원 정보를 입력해 주세요.</p>
 
     <form class="space-y-4" novalidate @submit.prevent="submit">
       <div>
@@ -26,7 +27,10 @@
       </fieldset>
 
       <p v-if="error" class="text-sm text-red-600" role="alert">{{ error.message }}</p>
-      <BaseButton type="submit" class="w-full" :loading="submitting">가입하기</BaseButton>
+      <div class="flex justify-end gap-2">
+        <BaseButton type="button" variant="secondary" :disabled="submitting" @click="router.push({ name: 'login' })">취소</BaseButton>
+        <BaseButton type="submit" :loading="submitting">회원가입</BaseButton>
+      </div>
     </form>
   </div>
 </template>

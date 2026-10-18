@@ -50,7 +50,7 @@ const statusOptions = toOptions(bikeStatusLabels)
 const resetFilters = () => {
   status.value = ''
 }
-const list = useListView((p) => bikeService.list(p), {
+const list = useListView((p) => bikeService.memberList(p), {
   searchFields: (b) => [b.id, b.location],
   predicate: (b) => !status.value || b.status === status.value,
   sort: (a, b) => (a.id ?? 0) - (b.id ?? 0),

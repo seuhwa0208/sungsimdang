@@ -1,7 +1,8 @@
 <template>
-  <div>
-    <PageHeader title="마이페이지" />
+  <div class="md:flex md:gap-8">
     <MyPageNav />
+    <div class="min-w-0 flex-1">
+    <PageHeader title="정보 수정" />
     <LoadingState v-if="!auth.currentUser" />
     <form v-else class="max-w-lg space-y-4 rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200" novalidate @submit.prevent="submit">
       <BaseInput :model-value="auth.currentUser.loginId" label="아이디" disabled />
@@ -10,8 +11,12 @@
       <BaseInput v-model="form.tel" label="전화번호" type="tel" :error="errors.tel" />
       <p v-if="error" class="text-sm text-red-600" role="alert">{{ error.message }}</p>
       <p v-if="saved" class="text-sm text-green-700" role="status">정보가 수정되었습니다.</p>
-      <BaseButton type="submit" :loading="submitting">저장</BaseButton>
+      <div class="flex justify-end gap-2">
+        <BaseButton type="button" variant="secondary" :disabled="submitting" @click="$router.push('/mypage')">취소</BaseButton>
+        <BaseButton type="submit" :loading="submitting">저장</BaseButton>
+      </div>
     </form>
+    </div>
   </div>
 </template>
 

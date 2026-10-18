@@ -7,22 +7,16 @@
     <p v-else-if="$route.query.registered" class="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-800">회원가입이 완료되었습니다. 로그인해 주세요.</p>
     <p v-else-if="$route.query.redirect" class="mb-4 rounded-md bg-blue-50 p-3 text-sm text-blue-800">로그인이 필요한 페이지입니다.</p>
 
-    <form class="space-y-4" novalidate @submit.prevent="submit('user')">
+    <form class="space-y-4" novalidate @submit.prevent="submit">
       <BaseInput v-model="form.loginId" label="아이디" placeholder="아이디를 입력하세요" autocomplete="username" required :error="errors.loginId" />
       <BaseInput v-model="form.password" label="비밀번호" type="password" placeholder="비밀번호를 입력하세요" autocomplete="current-password" required :error="errors.password" />
       <label class="flex items-center gap-2 text-sm text-gray-700"><input v-model="remember" type="checkbox" class="h-4 w-4" /> 아이디 저장</label>
       <p v-if="message" class="text-sm text-red-600" role="alert">{{ message }}</p>
 
-      <!-- 와이어프레임의 두 버튼. 서버 로그인 API 는 하나이며 "관리자 로그인"은 로그인 후 권한(MANAGER/ADMIN)을 확인한다. -->
-      <div class="grid grid-cols-2 gap-2">
-        <BaseButton type="submit" :loading="auth.loading && mode === 'user'" :disabled="auth.loading">일반 사용자 로그인</BaseButton>
-        <BaseButton variant="secondary" :loading="auth.loading && mode === 'admin'" :disabled="auth.loading" @click="submit('admin')">관리자 로그인</BaseButton>
-      </div>
+      <!-- 로그인 버튼은 하나. 로그인 후 서버가 알려주는 권한에 따라 이동한다. -->
+      <BaseButton type="submit" class="w-full" :loading="auth.loading" :disabled="auth.loading">로그인</BaseButton>
+      <BaseButton type="button" variant="secondary" class="w-full" :disabled="auth.loading" @click="$router.push('/signup')">회원가입</BaseButton>
     </form>
-
-    <p class="mt-6 text-center text-sm text-gray-500">
-      계정이 없으신가요? <RouterLink to="/signup" class="font-medium text-brand-600 hover:underline">회원가입</RouterLink>
-    </p>
     <p v-if="USE_MOCK" class="mt-4 rounded-md bg-gray-50 p-3 text-xs text-gray-500">
       Mock 계정: admin / manager01 / user01 (비밀번호 모두 <code>Test123!</code>)
     </p>
@@ -54,10 +48,8 @@ const form = reactive({ loginId: savedId, password: '' })
 const remember = ref(!!savedId)
 const errors = reactive({ loginId: '', password: '' })
 const message = ref('')
-const mode = ref('user')
 
-async function submit(kind) {
-  mode.value = kind
+async function submit() {
   message.value = ''
   errors.loginId = form.loginId.trim() ? '' : '아이디를 입력해 주세요.'
   errors.password = form.password ? '' : '비밀번호를 입력해 주세요.'
@@ -72,15 +64,10 @@ async function submit(kind) {
       /* ignore */
     }
 
-    if (kind === 'admin' && !['MANAGER', 'ADMIN'].includes(me.role)) {
-      await auth.logout()
-      message.value = '관리자 권한이 없는 계정입니다. "일반 사용자 로그인"을 이용해 주세요.'
-      return
-    }
     // 오픈 리다이렉트 방지: 같은 사이트 내부 경로만 허용
     const redirect = String(route.query.redirect || '')
     if (redirect.startsWith('/') && !redirect.startsWith('//')) return router.replace(redirect)
-    router.replace(kind === 'admin' ? '/dashboard' : '/')
+    router.replace(['MANAGER', 'ADMIN'].includes(me.role) ? '/dashboard' : '/')
   } catch (e) {
     message.value = e.response ? parseError(e).message : e.message || parseError(e).message
   }

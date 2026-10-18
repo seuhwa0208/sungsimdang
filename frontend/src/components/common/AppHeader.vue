@@ -42,8 +42,6 @@ const menus = [
   { to: '/notices', label: '공지사항' },
   { to: '/data-room', label: '자료실' },
   { to: '/qna', label: 'Q&A' },
-  { to: '/bikes', label: '타슈' },
-  { to: '/facilities', label: '기반시설' },
 ]
 const linkClass = 'rounded px-3 py-2 text-left text-sm hover:bg-gray-700'
 const roleLabel = computed(() => labelOf(memberRoleLabels, auth.role))

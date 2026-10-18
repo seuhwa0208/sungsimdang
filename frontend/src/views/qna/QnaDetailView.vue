@@ -19,6 +19,7 @@
           <BaseButton variant="secondary" @click="$router.push('/qna')">목록</BaseButton>
           <!-- 수정 가능 여부(본인·미답변 등)는 서버 정책 확정 전까지 서버 응답(403/409)에 따른다. -->
           <BaseButton v-if="auth.isAuthenticated && qna.status === 'WAITING'" variant="secondary" @click="$router.push(`/qna/${id}/edit`)">질문 수정</BaseButton>
+          <BaseButton v-if="auth.isAuthenticated" variant="danger" @click="ask('question')">질문 삭제</BaseButton>
         </footer>
       </article>
 
@@ -34,15 +35,31 @@
         <form v-if="auth.isAdmin" class="mt-6 space-y-3 border-t border-gray-100 pt-5" @submit.prevent="submitAnswer">
           <BaseInput v-model="answerText" as="textarea" :rows="5" :label="qna.answer ? '답변 수정' : '답변 작성'" :error="answerError" />
           <p v-if="error2" class="text-sm text-red-600" role="alert">{{ error2.message }}</p>
-          <BaseButton type="submit" :loading="submitting">{{ qna.answer ? '답변 수정' : '답변 등록' }}</BaseButton>
+          <div class="flex flex-wrap gap-2">
+            <BaseButton type="submit" :loading="submitting">{{ qna.answer ? '답변 수정' : '답변 등록' }}</BaseButton>
+            <BaseButton v-if="qna.answer" type="button" variant="danger" @click="ask('answer')">답변 삭제</BaseButton>
+          </div>
         </form>
       </section>
     </template>
+
+    <!-- 삭제 확인: 질문 DELETE /api/qna/{id}, 답변 DELETE /api/qna/admin/{id} (권한은 서버가 최종 검증) -->
+    <ConfirmDialog
+      v-model="confirmOpen"
+      :title="confirmKind === 'answer' ? '답변 삭제' : '질문 삭제'"
+      :message="confirmKind === 'answer' ? '등록된 답변을 삭제합니다.' : '질문을 삭제합니다.\n삭제한 질문은 복구할 수 없습니다.'"
+      confirm-text="삭제"
+      :loading="deleting"
+      :error="error3?.message"
+      @confirm="doDelete"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import ConfirmDialog from '../../components/common/ConfirmDialog.vue'
 import LoadingState from '../../components/common/LoadingState.vue'
 import ErrorState from '../../components/common/ErrorState.vue'
 import StatusBadge from '../../components/common/StatusBadge.vue'
@@ -70,5 +87,28 @@ async function submitAnswer() {
   const hasAnswer = !!qna.value.answer
   const ok = await run(() => (hasAnswer ? qnaService.updateAnswer(props.id, answerText.value) : qnaService.answer(props.id, answerText.value)))
   if (ok) await load() // 서버의 최신 상태(status/answeredAt)로 다시 조회
+}
+
+// ---- 삭제 (질문 / 답변) ----
+const router = useRouter()
+const confirmOpen = ref(false)
+const confirmKind = ref('question')
+const { submitting: deleting, error: error3, run: runDelete, clearError: clearDeleteError } = useSubmit()
+function ask(kind) {
+  confirmKind.value = kind
+  clearDeleteError()
+  confirmOpen.value = true
+}
+async function doDelete() {
+  // 204(본문 없음) 응답은 빈 문자열이라 run() 이 실패로 오해하지 않도록 true 를 돌려준다.
+  const ok = await runDelete(async () => {
+    if (confirmKind.value === 'answer') await qnaService.removeAnswer(props.id)
+    else await qnaService.remove(props.id)
+    return true
+  })
+  if (!ok) return
+  confirmOpen.value = false
+  if (confirmKind.value === 'answer') await load()
+  else router.push('/qna')
 }
 </script>

@@ -41,18 +41,29 @@ src/
 - 게시글 본문은 `v-html` 없이 텍스트로 렌더링. 자료실은 파일 업로드 UI 없음.
 - 세션(JSESSIONID) + CSRF: `GET /api/csrf` 로 토큰을 받아 변경 요청에 헤더로 전달, 403 시 1회만 재발급·재시도.
 
+## API 경로 ("API 명세서 1차 확정" 기준)
+
+`services/*.js` 의 경로는 `api명세서_1차_확정.txt` 를 따른다. 주의할 점:
+
+- 자전거는 **`/api/bike`(단수)**, 관리자 회원 관리는 **`/api/admin`**, 가입은 `/api/members/signup`.
+- 관리자용과 사용자용이 분리된 목록은 `/member`, `/member/search`, `/member/{id}` 를 사용자 화면(메인·타슈 현황·기반시설 현황)에서 호출한다.
+- 자전거·시설 **상태 변경은 `PATCH /{id}/maintenance`**, 회원 상태 변경은 `PATCH /admin/{id}/activate|inactivate|kick`.
+- 정비 이력은 `GET /maintenance`(전체)만 있어 자전거·시설별 화면은 응답 행의 `bikeId`/`facilityId` 로 프론트에서 거른다.
+
 ## 아직 확정되지 않은 부분 (services/ 의 TODO 참고)
 
 | 항목 | 현재 처리 |
 |---|---|
-| 시설/공지/자료실/Q&A REST 경로 | PRD 9.3 의 *제안* 경로로 구현. Controller 확정 시 `services/*.js` 만 수정 |
+| 명세서 오타 `/{bikeId}maintenance` | 슬래시 누락 오타로 보고 `/{bikeId}/maintenance` 로 구현 |
+| 상태 변경 PATCH 의 요청 body | 명세서에 없어 자전거 `{ status }`, 시설 `{ facilityStatus }` 로 가정 |
+| 정비 이력 응답의 `bikeId` / `facilityId` 필드 | 없으면 자전거·시설별 필터가 안 되고 전체가 보임 → DTO 확인 필요 |
+| 공지/자료실 `/search` 쿼리 파라미터 | 명세서에 없음. 화면은 아직 목록 API + 프론트 검색을 사용 |
 | `/api/csrf` 응답 형식 | `{ token, headerName }` 가정 (`services/api.js`) |
-| 내가 쓴 글 API | `GET /api/qna/me` 가정, 404 면 "API 미연결" 안내 |
-| 회원 탈퇴 | `DELETE /api/members/me/delete` + `{ password }` 가정 |
+| 회원 탈퇴 `POST /members/inactive` 의 body | 비밀번호 재확인 여부 미정 (`{ password }` 전송) |
 | 위치 목록 | 대전 1호선 역명 임시 목록 |
 | 대시보드 통계 | 전용 API 없음 → 목록 API 로 집계. "최근 정비 이력" 패널은 미구현 |
 | Q&A 공개 범위 / 수정 가능 조건 | 서버 응답(403/409)에 따름 |
-| 아이디 중복확인 | 와이어프레임에 있음. `GET /api/members/check-login-id` 가정, 404/405 면 안내만 표시 |
+| 아이디 중복확인 | 와이어프레임에 있으나 1차 명세서에 없음. `GET /api/members/check-login-id` 가정, 404/405 면 안내만 표시 |
 | 관리자 로그인 버튼 | 서버 로그인 API 는 하나. 로그인 후 MANAGER/ADMIN 권한을 확인 |
 
 ## 와이어프레임(.fig) / ERD 와의 차이 (참고용 — 팀 확인 필요)

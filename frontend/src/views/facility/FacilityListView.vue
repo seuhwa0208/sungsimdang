@@ -53,7 +53,7 @@ const resetFilters = () => {
   type.value = ''
   status.value = ''
 }
-const list = useListView((p) => facilityService.list(p), {
+const list = useListView((p) => facilityService.memberList(p), {
   searchFields: (f) => [f.facilityNo, f.location],
   predicate: (f) => (!type.value || f.facilityType === type.value) && (!status.value || f.facilityStatus === status.value),
   sort: (a, b) => (a.id ?? 0) - (b.id ?? 0),

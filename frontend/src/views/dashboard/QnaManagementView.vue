@@ -1,10 +1,8 @@
 <template>
   <div>
-    <PageHeader title="Q&A 관리" description="답변 대기 중인 질문을 확인하고 답변합니다." />
-
-    <ListToolbar v-model="list.keyword.value" placeholder="제목·내용 검색" @search="list.search" @reset="list.reset(resetFilters)">
-      <div class="w-40"><BaseSelect v-model="status" :options="statusOptions" placeholder="전체 상태" label="상태" /></div>
-    </ListToolbar>
+    <ManageToolbar v-model="list.keyword.value" title="Q&A 관리" keyword-label="게시글 번호" keyword-placeholder="게시글 검색" @search="list.search">
+      <div class="w-32"><BaseSelect v-model="status" :options="statusOptions" placeholder="전체" label="상태" /></div>
+    </ManageToolbar>
 
     <LoadingState v-if="list.loading.value" />
     <ErrorState v-else-if="list.error.value" :error="list.error.value" @retry="list.load" />
@@ -31,10 +29,9 @@
 
 <script setup>
 import { ref } from 'vue'
-import PageHeader from '../../components/common/PageHeader.vue'
+import ManageToolbar from '../../components/common/ManageToolbar.vue'
 import BaseButton from '../../components/common/BaseButton.vue'
 import BaseSelect from '../../components/common/BaseSelect.vue'
-import ListToolbar from '../../components/common/ListToolbar.vue'
 import LoadingState from '../../components/common/LoadingState.vue'
 import ErrorState from '../../components/common/ErrorState.vue'
 import EmptyState from '../../components/common/EmptyState.vue'
@@ -48,11 +45,8 @@ import { formatDate } from '../../utils/formatDate'
 
 const status = ref('WAITING') // 관리자는 기본적으로 답변 대기 건을 먼저 본다
 const statusOptions = toOptions(qnaStatusLabels)
-const resetFilters = () => {
-  status.value = ''
-}
 const list = useListView((p) => qnaService.list(p), {
-  searchFields: (q) => [q.title, q.content],
+  searchFields: (q) => [q.id, q.title, q.content],
   predicate: (q) => !status.value || q.status === status.value,
   sort: (a, b) => (b.id ?? 0) - (a.id ?? 0),
   watchSources: [status],
