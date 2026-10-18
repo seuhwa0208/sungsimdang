@@ -1,5 +1,5 @@
 // Mock 모드 전용 시드 데이터. 실제 서버/DB 와 무관하며 새로고침하면 초기화된다.
-// bikeNo 는 사용하지 않는다(자전거는 id 로 식별). facilityNo 는 현재 백엔드 Entity 에 존재하므로 포함한다.
+// 자산은 id로 식별한다. 어댑터는 위치를 실제 Enum으로 변환하고 과거 facilityNo를 응답에서 제거한다.
 const daysAgo = (n, h = 10) => {
   const d = new Date()
   d.setDate(d.getDate() - n)

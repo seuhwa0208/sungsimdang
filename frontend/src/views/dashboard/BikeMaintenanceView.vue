@@ -8,29 +8,20 @@
     <ErrorState v-else-if="bikeError" :error="bikeError" back-to="/dashboard/bikes" @retry="loadBike" />
     <template v-else-if="bike">
       <!-- 현재 상태 카드: 서버가 제공하는 값 + 이력에서 근거 있게 유도한 값만 표시 -->
-      <section class="grid gap-4 rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200 sm:grid-cols-4">
-        <div><p class="text-xs font-medium text-gray-500">위치</p><p class="mt-1 text-sm">{{ bike.location }}</p></div>
-        <div><p class="text-xs font-medium text-gray-500">현재 상태</p><div class="mt-1"><BikeStatusBadge :status="bike.status" /></div></div>
-        <div><p class="text-xs font-medium text-gray-500">누적 거리</p><p class="mt-1 text-sm">{{ formatDistance(bike.distance) }}</p></div>
-        <div><p class="text-xs font-medium text-gray-500">최근 정비 기록일</p><p class="mt-1 text-sm">{{ latestRecordAt ? `${formatDate(latestRecordAt)} (${daysAgoText(latestRecordAt)})` : '데이터 없음' }}</p></div>
+      <section class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
+        <h2 class="text-lg font-bold">고장 접수</h2>
+        <form class="mt-4 space-y-4" @submit.prevent="askFault">
+          <BaseSelect v-model="faultType" :options="faultOptions" placeholder="선택" label="고장 유형" :error="faultError" />
+          <p v-if="bike.status !== 'UNAVAILABLE'" class="text-sm text-gray-500">대시보드에서 이용불가 상태로 변경한 후 접수할 수 있습니다.</p>
+          <BaseButton type="submit" class="w-full" :disabled="bike.status !== 'UNAVAILABLE' || submitting">고장 접수하기</BaseButton>
+        </form>
       </section>
 
-      <section class="mt-4 grid gap-4 lg:grid-cols-2">
-        <div class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
-          <h2 class="font-bold">고장 접수</h2>
-          <p class="mt-1 text-xs text-gray-500">접수하면 새 정비 이력이 추가됩니다. 기존 이력은 수정되지 않습니다.</p>
-          <div class="mt-3 flex items-end gap-2">
-            <div class="flex-1"><BaseSelect v-model="faultType" :options="faultOptions" placeholder="고장 유형 선택" label="고장 유형" :error="faultError" /></div>
-            <BaseButton @click="askFault">접수</BaseButton>
-          </div>
-        </div>
-        <div class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
-          <h2 class="font-bold">현재 상태 변경</h2>
-          <p class="mt-1 text-xs text-gray-500">자전거의 현재 상태만 바꿉니다. 과거 이력의 당시 상태는 그대로 유지됩니다.</p>
-          <div class="mt-3 flex flex-wrap gap-2">
-            <BaseButton v-for="s in statusActions" :key="s.value" variant="secondary" :disabled="bike.status === s.value" @click="askStatus(s)">{{ s.label }}</BaseButton>
-          </div>
-        </div>
+      <section class="mt-5 grid gap-4 rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200 sm:grid-cols-4">
+        <div><p class="text-xs font-medium text-gray-500">위치</p><p class="mt-1 text-sm">{{ locationLabel(bike.location) }}</p></div>
+        <div><p class="text-xs font-medium text-gray-500">현재 상태</p><div class="mt-1"><BikeStatusBadge :status="bike.status" /></div></div>
+        <div><p class="text-xs font-medium text-gray-500">누적 거리</p><p class="mt-1 text-sm">{{ formatDistance(bike.distance) }}</p></div>
+        <div><p class="text-xs font-medium text-gray-500">최근 정비 기록일</p><p class="mt-1 text-sm">{{ latestRecordAt ? `${formatDate(latestRecordAt)} (${daysAgoText(latestRecordAt)})` : histError ? '조회 불가' : '기록 없음' }}</p></div>
       </section>
 
       <section class="mt-6">
@@ -46,6 +37,7 @@
 </template>
 
 <script setup>
+import { locationLabel } from '../../constants/locations'
 import { computed, reactive, ref } from 'vue'
 import PageHeader from '../../components/common/PageHeader.vue'
 import BaseButton from '../../components/common/BaseButton.vue'
@@ -58,7 +50,7 @@ import BikeHistoryTable from '../../components/bike/BikeHistoryTable.vue'
 import { useAsyncData } from '../../composables/useAsyncData'
 import { useSubmit } from '../../composables/useSubmit'
 import { bikeService } from '../../services/bikeService'
-import { bikeFaultLabels, bikeStatusLabels, labelOf, toOptions } from '../../utils/statusLabels'
+import { bikeFaultLabels, labelOf, toOptions } from '../../utils/statusLabels'
 import { formatBikeId, formatDistance } from '../../utils/format'
 import { formatDate, daysAgoText } from '../../utils/formatDate'
 import { normalizeList } from '../../utils/list'
@@ -81,12 +73,6 @@ const flash = (m) => {
 const faultOptions = toOptions(bikeFaultLabels)
 const faultType = ref('')
 const faultError = ref('')
-const statusActions = [
-  { value: 'REPAIRING', label: '정비 시작 (정비중)' },
-  { value: 'AVAILABLE', label: '정비 완료 (이용가능)' },
-  { value: 'UNAVAILABLE', label: '운영중지 처리' },
-]
-
 const confirm = reactive({ open: false, title: '', message: '', confirmText: '확인', action: null })
 function openConfirm(cfg) {
   clearError()
@@ -104,17 +90,6 @@ function askFault() {
       await bikeService.addMaintenance(props.id, type) // 서버로는 Enum 원문 전송
       faultType.value = ''
       return '고장을 접수했습니다.'
-    },
-  })
-}
-function askStatus(s) {
-  openConfirm({
-    title: '상태 변경',
-    message: `현재 상태를 '${labelOf(bikeStatusLabels, bike.value.status)}' → '${labelOf(bikeStatusLabels, s.value)}' 로 변경합니다.`,
-    confirmText: '변경',
-    action: async () => {
-      await bikeService.updateStatus(props.id, s.value)
-      return '상태를 변경했습니다.'
     },
   })
 }

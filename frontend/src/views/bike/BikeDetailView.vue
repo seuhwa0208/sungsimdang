@@ -8,7 +8,7 @@
         <BaseButton v-if="auth.canManageOps" @click="$router.push(`/dashboard/bikes/${bike.id}/maintenance`)">고장·정비 관리</BaseButton>
       </PageHeader>
       <dl class="grid gap-6 rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200 sm:grid-cols-3">
-        <div><dt class="text-xs font-medium text-gray-500">현재 위치</dt><dd class="mt-1 text-sm">{{ bike.location }}</dd></div>
+        <div><dt class="text-xs font-medium text-gray-500">현재 위치</dt><dd class="mt-1 text-sm">{{ locationLabel(bike.location) }}</dd></div>
         <div><dt class="text-xs font-medium text-gray-500">상태</dt><dd class="mt-1"><BikeStatusBadge :status="bike.status" /></dd></div>
         <div><dt class="text-xs font-medium text-gray-500">누적 거리</dt><dd class="mt-1 text-sm">{{ formatDistance(bike.distance) }}</dd></div>
       </dl>
@@ -17,6 +17,7 @@
 </template>
 
 <script setup>
+import { locationLabel } from '../../constants/locations'
 import PageHeader from '../../components/common/PageHeader.vue'
 import LoadingState from '../../components/common/LoadingState.vue'
 import ErrorState from '../../components/common/ErrorState.vue'

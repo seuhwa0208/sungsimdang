@@ -12,11 +12,11 @@
     <section class="grid gap-6 lg:grid-cols-2">
       <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
         <div class="flex items-center justify-between"><h2 class="text-lg font-bold">타슈 운영 현황</h2><RouterLink to="/bikes" class="text-sm text-brand-600 hover:underline">더보기 〉</RouterLink></div>
-        <div class="mt-5 grid grid-cols-3 gap-3">
+        <div class="mt-5 grid gap-3 sm:grid-cols-3">
           <div v-for="s in bikeStats" :key="s.key" class="rounded-xl bg-sky-100 px-4 py-3">
             <p class="text-sm text-gray-800">{{ s.label }}</p>
             <div class="mt-1 flex items-center justify-between gap-2">
-              <p class="text-xl font-bold text-gray-900">{{ bikes.loading ? '…' : bikes.error ? '-' : s.count }}대</p>
+              <p class="text-xl font-bold tabular-nums text-gray-900">{{ bikes.loading.value ? '조회 중' : bikes.error.value ? '조회 불가' : s.count.toLocaleString('ko-KR') + '대' }}</p>
               <StatIcon :name="s.icon" />
             </div>
           </div>
@@ -61,11 +61,11 @@
 
       <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
         <div class="flex items-center justify-between"><h2 class="text-lg font-bold">기반시설 현황</h2><RouterLink to="/facilities" class="text-sm text-brand-600 hover:underline">더보기 〉</RouterLink></div>
-        <div class="mt-5 grid grid-cols-3 gap-3">
+        <div class="mt-5 grid gap-3 sm:grid-cols-3">
           <div v-for="s in facilityStats" :key="s.key" class="rounded-xl bg-sky-100 px-4 py-3">
             <p class="text-sm text-gray-800">{{ s.label }}</p>
             <div class="mt-1 flex items-center justify-between gap-2">
-              <p class="text-xl font-bold text-gray-900">{{ facilities.loading ? '…' : facilities.error ? '-' : s.count }}개</p>
+              <p class="text-xl font-bold tabular-nums text-gray-900">{{ facilities.loading.value ? '조회 중' : facilities.error.value ? '조회 불가' : s.count.toLocaleString('ko-KR') + '개' }}</p>
               <StatIcon :name="s.icon" />
             </div>
           </div>
@@ -80,8 +80,8 @@
     <section class="grid gap-6 lg:grid-cols-2">
       <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
         <div class="flex items-center justify-between"><h2 class="text-lg font-bold">최근 공지사항</h2><RouterLink to="/notices" class="text-sm text-brand-600 hover:underline">더보기 〉</RouterLink></div>
-        <LoadingState v-if="notices.loading" />
-        <p v-else-if="notices.error" class="py-8 text-center text-sm text-gray-500">공지사항을 불러오지 못했습니다.</p>
+        <LoadingState v-if="notices.loading.value" />
+        <p v-else-if="notices.error.value" class="py-8 text-center text-sm text-gray-500">공지사항을 불러오지 못했습니다.</p>
         <EmptyState v-else-if="!recentNotices.length" title="등록된 공지사항이 없습니다." />
         <ul v-else class="mt-3 divide-y divide-gray-100">
           <li v-for="n in recentNotices" :key="n.id">
@@ -94,8 +94,8 @@
 
       <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
         <div class="flex items-center justify-between"><h2 class="text-lg font-bold">Q&amp;A</h2><RouterLink to="/qna" class="text-sm text-brand-600 hover:underline">더보기 〉</RouterLink></div>
-        <LoadingState v-if="qna.loading" />
-        <p v-else-if="qna.error" class="py-8 text-center text-sm text-gray-500">Q&amp;A를 불러오지 못했습니다.</p>
+        <LoadingState v-if="qna.loading.value" />
+        <p v-else-if="qna.error.value" class="py-8 text-center text-sm text-gray-500">Q&amp;A를 불러오지 못했습니다.</p>
         <EmptyState v-else-if="!recentQna.length" title="등록된 질문이 없습니다." />
         <ul v-else class="mt-3 divide-y divide-gray-100">
           <li v-for="q in recentQna" :key="q.id">
@@ -131,19 +131,19 @@ const notices = useAsyncData(() => noticeService.list())
 const qna = useAsyncData(() => qnaService.list())
 
 const itemsOf = (src) => normalizeList(src.data.value).items
-const newest = (arr) => [...arr].sort((a, b) => (b.id ?? 0) - (a.id ?? 0)).slice(0, 5)
+const newest = (arr) => [...arr].sort((a, b) => (b.id ?? 0) - (a.id ?? 0)).slice(0, 3)
 
 // 와이어프레임 메인 화면 카드 순서·문구·아이콘을 따른다.
-// 시설의 '점검중'은 REPAIRING, '수리 중'은 UNAVAILABLE 로 매핑했다.
+// 상태 문구는 실제 백엔드 Enum 의미에 맞춘다.
 const BIKE_CARDS = [
   { key: 'AVAILABLE', label: '이용가능 자전거', icon: 'bike' },
   { key: 'REPAIRING', label: '정비중', icon: 'wrench' },
-  { key: 'UNAVAILABLE', label: '운영중지', icon: 'ban' },
+  { key: 'UNAVAILABLE', label: '이용불가', icon: 'ban' },
 ]
 const FACILITY_CARDS = [
-  { key: 'AVAILABLE', label: '정상 시설', icon: 'building' },
+  { key: 'AVAILABLE', label: '이용가능 시설', icon: 'building' },
   { key: 'REPAIRING', label: '점검중', icon: 'wrench' },
-  { key: 'UNAVAILABLE', label: '수리 중', icon: 'ban' },
+  { key: 'UNAVAILABLE', label: '이용불가', icon: 'ban' },
 ]
 const bikeStats = computed(() => BIKE_CARDS.map((c) => ({ ...c, count: itemsOf(bikes).filter((b) => b.status === c.key).length })))
 const facilityStats = computed(() => FACILITY_CARDS.map((c) => ({ ...c, count: itemsOf(facilities).filter((f) => f.facilityStatus === c.key).length })))

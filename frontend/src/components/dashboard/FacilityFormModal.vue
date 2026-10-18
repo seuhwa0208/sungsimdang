@@ -1,5 +1,5 @@
 <template>
-  <BaseModal :model-value="modelValue" :title="facility ? `${facility.facilityNo || facility.id} 정보 수정` : '시설 등록'" :persistent="submitting" @update:model-value="emit('update:modelValue', $event)">
+  <BaseModal :model-value="modelValue" :title="facility ? `${facility.id} 정보 수정` : '시설 등록'" :persistent="submitting" @update:model-value="emit('update:modelValue', $event)">
     <div class="space-y-4">
       <!-- 시설 번호(FACILITY-xxx)는 id 에서 파생되는 표시값이므로 입력받지 않는다. -->
       <BaseSelect v-model="values.facilityType" :options="typeOptions" label="시설 유형" placeholder="유형을 선택하세요" required :error="errors.facilityType" />
@@ -32,9 +32,10 @@ const typeOptions = toOptions(facilityTypeLabels)
 const values = reactive({ facilityType: '', location: '' })
 const errors = reactive({ facilityType: '', location: '' })
 const locationOptions = computed(() => {
-  const names = new Set(LOCATION_OPTIONS)
-  if (props.facility?.location) names.add(props.facility.location)
-  return [...names].map((v) => ({ value: v, label: v }))
+  const options = [...LOCATION_OPTIONS]
+  const current = props.facility?.location
+  if (current && !options.some(option => option.value === current)) options.push({ value: current, label: current })
+  return options
 })
 
 watch(

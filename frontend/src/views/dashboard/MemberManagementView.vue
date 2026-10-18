@@ -29,7 +29,7 @@
             <div class="flex justify-end gap-1.5">
               <!-- 본인 계정의 권한/상태 변경은 관리자 잠금(lock-out) 방지를 위해 UI 에서 막는다. -->
               <BaseButton size="sm" variant="secondary" :disabled="isMe(m)" @click="openEdit(m, 'role')">권한 변경</BaseButton>
-              <BaseButton size="sm" variant="secondary" :disabled="isMe(m)" @click="openEdit(m, 'status')">상태 변경</BaseButton>
+              <BaseButton size="sm" variant="secondary" :disabled="isMe(m) || m.role === 'ADMIN'" @click="openEdit(m, 'status')">상태 변경</BaseButton>
             </div>
           </td>
         </tr>

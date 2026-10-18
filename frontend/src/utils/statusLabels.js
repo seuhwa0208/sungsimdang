@@ -5,7 +5,7 @@
 export const bikeStatusLabels = {
   AVAILABLE: '이용가능',
   REPAIRING: '정비중',
-  UNAVAILABLE: '운영중지',
+  UNAVAILABLE: '이용불가',
 }
 
 // 주의: 서버 Enum 철자가 HANDEL 이다. 프론트에서 HANDLE 로 고치면 서버와 불일치한다.
@@ -19,9 +19,9 @@ export const bikeFaultLabels = {
 }
 
 export const facilityStatusLabels = {
-  AVAILABLE: '정상',
-  REPAIRING: '정비중',
-  UNAVAILABLE: '운영중지',
+  AVAILABLE: '이용가능',
+  REPAIRING: '점검중',
+  UNAVAILABLE: '이용불가',
 }
 
 export const facilityTypeLabels = {
@@ -69,12 +69,15 @@ export const statusTone = {
   KICKED: 'red',
 }
 
-// 대시보드에서 상태 배지를 누를 때 순환하는 순서: 이용가능 → 운영중지 → 정비중 → (다시) 이용가능
-export const STATUS_ROTATION = ['AVAILABLE', 'UNAVAILABLE', 'REPAIRING']
+// 대시보드에서 자전거·시설 상태 배지를 누르면 바뀌는 다음 상태 (백엔드 서비스 규칙 기준)
+//  - 이용가능 → 운영중지, 운영중지 → 이용가능 : PATCH /{id}/maintenance { status }
+//  - 정비중 → 이용가능(정비 완료)             : PATCH /{id}/status  (정비 이력이 함께 남는다)
+// '정비중'으로 바꾸는 방법은 "고장 접수"(POST /{id}/maintenance)뿐이다. 접수는 운영중지 상태에서만 가능하다.
+export const STATUS_NEXT = { AVAILABLE: 'UNAVAILABLE', UNAVAILABLE: 'AVAILABLE', REPAIRING: 'AVAILABLE' }
+export const nextStatus = (current) => STATUS_NEXT[current]
 // 회원 상태 배지는 활성 ↔ 비활성만 오간다. (강퇴는 이 목록에 없어 배지를 눌러도 바뀌지 않는다)
 export const MEMBER_ROTATION = ['ACTIVE', 'INACTIVE']
 export const nextIn = (rotation, current) => rotation[(rotation.indexOf(current) + 1) % rotation.length]
-export const nextStatus = (current) => nextIn(STATUS_ROTATION, current)
 
 export const toOptions = (labels) => Object.entries(labels).map(([value, label]) => ({ value, label }))
 export const labelOf = (labels, value) => labels[value] ?? value ?? '-'

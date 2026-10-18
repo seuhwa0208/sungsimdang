@@ -29,9 +29,10 @@ const location = ref('')
 const locationError = ref('')
 // 기존 위치가 목록에 없더라도 선택할 수 있도록 옵션에 포함
 const locationOptions = computed(() => {
-  const names = new Set(LOCATION_OPTIONS)
-  if (props.bike?.location) names.add(props.bike.location)
-  return [...names].map((v) => ({ value: v, label: v }))
+  const options = [...LOCATION_OPTIONS]
+  const current = props.bike?.location
+  if (current && !options.some(option => option.value === current)) options.push({ value: current, label: current })
+  return options
 })
 
 watch(

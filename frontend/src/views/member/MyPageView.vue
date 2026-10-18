@@ -25,12 +25,11 @@
     </div>
 
     <BaseModal v-model="withdrawOpen" title="회원 탈퇴" :persistent="submitting">
-      <p class="mb-4 text-sm text-gray-700">정말 탈퇴하시겠습니까? 탈퇴하면 계정이 비활성화되어 더 이상 로그인할 수 없습니다. 본인 확인을 위해 비밀번호를 입력해 주세요.</p>
-      <BaseInput v-model="withdrawPassword" label="비밀번호" type="password" autocomplete="current-password" :error="error?.fieldErrors?.password" />
+      <p class="mb-4 text-sm text-gray-700">정말 탈퇴하시겠습니까? 탈퇴하면 계정이 비활성화되어 더 이상 로그인할 수 없습니다.</p>
       <p v-if="error && !error.fieldErrors?.password" class="mt-2 text-sm text-red-600" role="alert">{{ error.message }}</p>
       <template #footer>
         <BaseButton variant="secondary" :disabled="submitting" @click="withdrawOpen = false">취소</BaseButton>
-        <BaseButton variant="danger" :loading="submitting" :disabled="!withdrawPassword" @click="withdraw">탈퇴하기</BaseButton>
+        <BaseButton variant="danger" :loading="submitting" @click="withdraw">탈퇴하기</BaseButton>
       </template>
     </BaseModal>
   </div>
@@ -44,7 +43,6 @@ import MyPageNav from '../../components/common/MyPageNav.vue'
 import LoadingState from '../../components/common/LoadingState.vue'
 import StatusBadge from '../../components/common/StatusBadge.vue'
 import BaseButton from '../../components/common/BaseButton.vue'
-import BaseInput from '../../components/common/BaseInput.vue'
 import BaseModal from '../../components/common/BaseModal.vue'
 import { useAuthStore } from '../../stores/authStore'
 import { useSubmit } from '../../composables/useSubmit'
@@ -60,24 +58,22 @@ const rows = computed(() => [
   { label: '이름', value: user.value.name },
   { label: '이메일', value: user.value.email || '-' },
   { label: '가입일', value: formatDateTime(user.value.createdAt) },
-  { label: '계정 상태', badge: true },
-  { label: '권한', value: labelOf(memberRoleLabels, user.value.role) },
+  ...(auth.canManageOps ? [{ label: '계정 상태', badge: true }] : []),
+  ...(auth.canManageOps ? [{ label: '권한', value: labelOf(memberRoleLabels, user.value.role) }] : []),
   { label: '전화번호', value: user.value.tel || '-' },
 ])
 
 const withdrawOpen = ref(false)
-const withdrawPassword = ref('')
 const { submitting, error, run, clearError } = useSubmit()
 
 function openWithdraw() {
-  withdrawPassword.value = ''
   clearError()
   withdrawOpen.value = true
 }
 
 async function withdraw() {
-  // TODO(미확정): 탈퇴 API(DELETE /api/members/me/delete)와 비밀번호 재확인 방식은 실제 Controller 확인 후 맞춘다.
-  const ok = await run(() => memberService.withdraw({ password: withdrawPassword.value }))
+  // POST /api/members/inactive: 현재 Controller는 body 없이 세션 회원을 비활성화한다.
+  const ok = await run(() => memberService.withdraw())
   if (!ok) return
   withdrawOpen.value = false
   auth.clearSession()

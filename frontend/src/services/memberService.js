@@ -4,15 +4,13 @@ import api from './api'
 export const memberService = {
   register: (payload) => api.post('/members/signup', payload).then((r) => r.data), // 회원 가입
   // 401 은 "로그인 실패"이므로 전역 세션 만료 처리를 건너뛴다.
-  // TODO(미확정): 와이어프레임의 아이디 "중복확인" 용. 1차 명세서에 없는 경로이며, 404/405 면 화면에서 안내만 표시한다.
-  checkLoginId: (loginId) => api.get('/members/check-login-id', { params: { loginId }, skipAuthRedirect: true }).then((r) => r.data),
   login: (payload) => api.post('/members/login', payload, { skipAuthRedirect: true }).then((r) => r.data),
   logout: () => api.post('/members/logout', null, { skipAuthRedirect: true }).then((r) => r.data),
   me: () => api.get('/members/me', { skipAuthRedirect: true }).then((r) => r.data), // 마이 페이지
   updateMe: (payload) => api.put('/members/me', payload).then((r) => r.data), // { name, email, tel }
   changePassword: (payload) => api.put('/members/password', payload).then((r) => r.data), // { password, newPassword, passwordCheck }
   // 회원 탈퇴 = POST /members/inactive (소프트 삭제). 비밀번호 재확인 요구 여부는 서버 확정 후 확인.
-  withdraw: (payload) => api.post('/members/inactive', payload).then((r) => r.data),
+  withdraw: () => api.post('/members/inactive').then((r) => r.data),
 }
 
 // 관리자 회원 관리 (/api/admin). 화면 코드는 updateStatus(id, 'ACTIVE'|'INACTIVE'|'KICKED') 를 그대로 쓰고,

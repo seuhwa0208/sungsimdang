@@ -1,6 +1,9 @@
 <template>
   <svg class="h-7 w-7 shrink-0 text-gray-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <template v-if="name === 'person'">
+    <template v-if="name === 'check'">
+      <path d="m8 12 3 3 8-9" /><path d="M21 12a9 9 0 1 1-9-9" />
+    </template>
+    <template v-else-if="name === 'person'">
       <circle cx="12" cy="8" r="4" />
       <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
     </template>

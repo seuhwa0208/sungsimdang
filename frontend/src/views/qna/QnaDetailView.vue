@@ -17,9 +17,10 @@
         <div class="whitespace-pre-wrap break-words p-6 text-sm leading-7 text-gray-800">{{ qna.content }}</div>
         <footer class="flex flex-wrap justify-between gap-2 border-t border-gray-200 p-4">
           <BaseButton variant="secondary" @click="$router.push('/qna')">목록</BaseButton>
-          <!-- 수정 가능 여부(본인·미답변 등)는 서버 정책 확정 전까지 서버 응답(403/409)에 따른다. -->
-          <BaseButton v-if="auth.isAuthenticated && qna.status === 'WAITING'" variant="secondary" @click="$router.push(`/qna/${id}/edit`)">질문 수정</BaseButton>
-          <BaseButton v-if="auth.isAuthenticated" variant="danger" @click="ask('question')">질문 삭제</BaseButton>
+          <div v-if="canEditQuestion" class="ml-auto flex flex-wrap justify-end gap-2">
+            <BaseButton variant="secondary" @click="$router.push(`/qna/${id}/edit`)">{{ auth.isAdmin ? '수정' : '질문 수정' }}</BaseButton>
+            <BaseButton variant="danger" @click="ask('question')">{{ auth.isAdmin ? '삭제' : '질문 삭제' }}</BaseButton>
+          </div>
         </footer>
       </article>
 
@@ -35,7 +36,7 @@
         <form v-if="auth.isAdmin" class="mt-6 space-y-3 border-t border-gray-100 pt-5" @submit.prevent="submitAnswer">
           <BaseInput v-model="answerText" as="textarea" :rows="5" :label="qna.answer ? '답변 수정' : '답변 작성'" :error="answerError" />
           <p v-if="error2" class="text-sm text-red-600" role="alert">{{ error2.message }}</p>
-          <div class="flex flex-wrap gap-2">
+          <div class="flex flex-wrap justify-end gap-2">
             <BaseButton type="submit" :loading="submitting">{{ qna.answer ? '답변 수정' : '답변 등록' }}</BaseButton>
             <BaseButton v-if="qna.answer" type="button" variant="danger" @click="ask('answer')">답변 삭제</BaseButton>
           </div>
@@ -57,7 +58,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import ConfirmDialog from '../../components/common/ConfirmDialog.vue'
 import LoadingState from '../../components/common/LoadingState.vue'
@@ -69,12 +70,21 @@ import { useAuthStore } from '../../stores/authStore'
 import { useAsyncData } from '../../composables/useAsyncData'
 import { useSubmit } from '../../composables/useSubmit'
 import { qnaService } from '../../services/qnaService'
+import { normalizeList } from '../../utils/list'
 import { qnaStatusLabels, labelOf, statusTone } from '../../utils/statusLabels'
 import { formatDateTime } from '../../utils/formatDate'
 
 const props = defineProps({ id: { type: String, required: true } })
 const auth = useAuthStore()
 const { data: qna, loading, error, load } = useAsyncData(() => qnaService.get(props.id))
+
+const { data: myQuestions, load: loadMyQuestions } = useAsyncData(() => qnaService.mine(), { immediate: false })
+watch(() => auth.currentUser?.id, () => {
+  myQuestions.value = null
+  if (auth.isAuthenticated && !auth.isAdmin) loadMyQuestions()
+}, { immediate: true })
+const canEditQuestion = computed(() => auth.isAdmin || normalizeList(myQuestions.value).items.some(item => String(item.id) === String(props.id)))
+watch(() => props.id, () => load())
 
 const answerText = ref('')
 const answerError = ref('')

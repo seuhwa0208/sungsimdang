@@ -35,7 +35,6 @@ const routes = [
   { path: '/bikes', name: 'bikes', component: () => import('../views/bike/BikeListView.vue') },
   { path: '/bikes/:id(\\d+)', name: 'bike-detail', component: () => import('../views/bike/BikeDetailView.vue'), props: true },
   { path: '/facilities', name: 'facilities', component: () => import('../views/facility/FacilityListView.vue') },
-  { path: '/facilities/:id(\\d+)', name: 'facility-detail', component: () => import('../views/facility/FacilityDetailView.vue'), props: true },
 
   { path: '/dashboard', name: 'dashboard', component: () => import('../views/dashboard/DashboardHomeView.vue'), meta: { auth: true, roles: OPS, layout: 'dashboard' } },
   { path: '/dashboard/members', name: 'dashboard-members', component: () => import('../views/dashboard/MemberManagementView.vue'), meta: { auth: true, roles: ADMIN, layout: 'dashboard' } },

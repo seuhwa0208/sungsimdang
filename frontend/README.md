@@ -39,7 +39,7 @@ src/
 - Enum 은 서버 값 그대로 송수신(`HANDEL` 철자 포함), 한글은 표시용 레이블만.
 - 목록 API 가 배열이면 Vue 에서 검색·필터·페이징, `Page` 응답이면 서버 페이징으로 자동 전환.
 - 게시글 본문은 `v-html` 없이 텍스트로 렌더링. 자료실은 파일 업로드 UI 없음.
-- 세션(JSESSIONID) + CSRF: `GET /api/csrf` 로 토큰을 받아 변경 요청에 헤더로 전달, 403 시 1회만 재발급·재시도.
+- 세션(JSESSIONID) + CSRF: Spring Security `csrf.spa()`가 최초 세션 조회(`GET /api/members/me`) 때 `XSRF-TOKEN` 쿠키를 발급하고, Axios가 변경 요청에 `X-XSRF-TOKEN` 헤더를 전달한다. 별도 토큰 API나 자동 재시도는 없다.
 
 ## API 경로 ("API 명세서 1차 확정" 기준)
 
@@ -58,7 +58,7 @@ src/
 | 상태 변경 PATCH 의 요청 body | 명세서에 없어 자전거 `{ status }`, 시설 `{ facilityStatus }` 로 가정 |
 | 정비 이력 응답의 `bikeId` / `facilityId` 필드 | 없으면 자전거·시설별 필터가 안 되고 전체가 보임 → DTO 확인 필요 |
 | 공지/자료실 `/search` 쿼리 파라미터 | 명세서에 없음. 화면은 아직 목록 API + 프론트 검색을 사용 |
-| `/api/csrf` 응답 형식 | `{ token, headerName }` 가정 (`services/api.js`) |
+| CSRF 연동 | `SpringSecurity.csrf.spa()` + Axios의 쿠키/헤더 전달. 토큰 누락·불일치는 403 JSON 응답 |
 | 회원 탈퇴 `POST /members/inactive` 의 body | 비밀번호 재확인 여부 미정 (`{ password }` 전송) |
 | 위치 목록 | 대전 1호선 역명 임시 목록 |
 | 대시보드 통계 | 전용 API 없음 → 목록 API 로 집계. "최근 정비 이력" 패널은 미구현 |

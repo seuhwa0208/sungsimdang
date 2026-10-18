@@ -28,7 +28,7 @@
         </template>
         <tr v-for="b in list.pageItems.value" :key="b.id">
           <td class="px-4 py-3 text-center font-medium">{{ formatBikeId(b.id) }}</td>
-          <td class="px-4 py-3 text-center">{{ b.location }}</td>
+          <td class="px-4 py-3 text-center">{{ locationLabel(b.location) }}</td>
           <td class="px-4 py-3 text-center"><BikeStatusBadge :status="b.status" /></td>
           <td class="px-4 py-3">
             <div class="flex justify-center gap-1.5">
@@ -45,7 +45,7 @@
     <BaseModal v-model="formOpen" :title="editing ? `자전거 ${formatBikeId(editing.id)} 정보 수정` : '자전거 등록'" :persistent="submitting">
       <!-- 자전거 번호(bikeNo)는 입력받지 않는다. 식별자는 서버가 부여하는 id 이다. -->
       <BaseSelect v-model="location" :options="locationOptions" label="위치" placeholder="위치를 선택하세요" required :error="locationError" />
-      <div v-if="editing" class="mt-3"><BaseSelect v-model="newStatus" :options="statusOptions" label="상태" /></div>
+      <div v-if="editing" class="mt-3"><BaseSelect v-model="newStatus" :options="statusOptions.filter(option => option.value !== 'REPAIRING' || option.value === newStatus)" label="상태" /></div>
       <p v-if="error" class="mt-3 text-sm text-red-600" role="alert">{{ error.message }}</p>
       <template #footer>
         <BaseButton v-if="editing" class="mr-auto" variant="danger" :disabled="submitting" @click="askRemoveFromForm">삭제</BaseButton>
@@ -60,6 +60,7 @@
 </template>
 
 <script setup>
+import { locationLabel } from '../../constants/locations'
 import { computed, ref } from 'vue'
 import ManageToolbar from '../../components/common/ManageToolbar.vue'
 import StatIcon from '../../components/common/StatIcon.vue'
@@ -76,6 +77,7 @@ import BikeStatusBadge from '../../components/bike/BikeStatusBadge.vue'
 import { useListView } from '../../composables/useListView'
 import { useSubmit } from '../../composables/useSubmit'
 import { bikeService } from '../../services/bikeService'
+import { changeOperationStatus } from '../../services/operationService'
 import { LOCATION_OPTIONS } from '../../constants/locations'
 import { bikeStatusLabels, toOptions } from '../../utils/statusLabels'
 import { formatBikeId } from '../../utils/format'
@@ -83,7 +85,7 @@ import { formatBikeId } from '../../utils/format'
 const status = ref('')
 const statusOptions = toOptions(bikeStatusLabels)
 const list = useListView((p) => bikeService.list(p), {
-  searchFields: (b) => [b.id, formatBikeId(b.id), b.location],
+  searchFields: (b) => [b.id, formatBikeId(b.id), b.location, locationLabel(b.location)],
   predicate: (b) => !status.value || b.status === status.value,
   sort: (a, b) => (a.id ?? 0) - (b.id ?? 0),
   watchSources: [status],
@@ -105,9 +107,10 @@ const locationError = ref('')
 const newStatus = ref('')
 // 기존 위치가 임시 목록에 없더라도 선택 가능하도록 옵션에 포함
 const locationOptions = computed(() => {
-  const names = new Set(LOCATION_OPTIONS)
-  if (editing.value?.location) names.add(editing.value.location)
-  return [...names].map((v) => ({ value: v, label: v }))
+  const options = [...LOCATION_OPTIONS]
+  const current = editing.value?.location
+  if (current && !options.some(option => option.value === current)) options.push({ value: current, label: current })
+  return options
 })
 function openCreate() {
   editing.value = null
@@ -131,7 +134,7 @@ async function saveForm() {
     if (!editing.value) return bikeService.create(location.value)
     const b = editing.value
     if (location.value !== b.location) await bikeService.update(b.id, location.value)
-    if (newStatus.value !== b.status) await bikeService.updateStatus(b.id, newStatus.value)
+    if (newStatus.value !== b.status) await changeOperationStatus(bikeService, b.id, b.status, newStatus.value)
     return true
   })
   if (!ok) return

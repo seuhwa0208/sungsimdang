@@ -27,7 +27,7 @@
           <tr><th class="px-4 py-3 text-center">시설번호</th><th class="px-4 py-3 text-center">유형</th><th class="px-4 py-3 text-center">상태</th><th class="px-4 py-3 text-center">작업</th></tr>
         </template>
         <tr v-for="f in list.pageItems.value" :key="f.id">
-          <td class="px-4 py-3 text-center font-medium">{{ f.facilityNo || '-' }}</td>
+          <td class="px-4 py-3 text-center font-medium">{{ formatFacilityId(f.id) }}</td>
           <td class="px-4 py-3 text-center">{{ labelOf(facilityTypeLabels, f.facilityType) }}</td>
           <td class="px-4 py-3 text-center"><FacilityStatusBadge :status="f.facilityStatus" /></td>
           <td class="px-4 py-3">
@@ -47,7 +47,7 @@
         <!-- facilityNo 는 FacilityRequest 에 없으므로 입력받지 않는다. (서버 부여 여부는 최신 Entity 확인) -->
         <BaseSelect v-model="form.facilityType" :options="typeOptions" label="시설 유형" placeholder="유형을 선택하세요" required :error="errors.facilityType" />
         <BaseSelect v-model="form.location" :options="locationOptions" label="위치" placeholder="위치를 선택하세요" required :error="errors.location" />
-        <BaseSelect v-if="editing" v-model="newStatus" :options="statusOptions" label="상태" />
+        <BaseSelect v-if="editing" v-model="newStatus" :options="statusOptions.filter(option => option.value !== 'REPAIRING' || option.value === newStatus)" label="상태" />
       </div>
       <p v-if="error" class="mt-3 text-sm text-red-600" role="alert">{{ error.message }}</p>
       <template #footer>
@@ -63,6 +63,7 @@
 </template>
 
 <script setup>
+import { locationLabel } from '../../constants/locations'
 import { computed, reactive, ref } from 'vue'
 import ManageToolbar from '../../components/common/ManageToolbar.vue'
 import StatIcon from '../../components/common/StatIcon.vue'
@@ -79,6 +80,8 @@ import FacilityStatusBadge from '../../components/facility/FacilityStatusBadge.v
 import { useListView } from '../../composables/useListView'
 import { useSubmit } from '../../composables/useSubmit'
 import { facilityService } from '../../services/facilityService'
+import { changeOperationStatus } from '../../services/operationService'
+import { formatFacilityId } from '../../utils/format'
 import { LOCATION_OPTIONS } from '../../constants/locations'
 import { facilityStatusLabels, facilityTypeLabels, labelOf, toOptions } from '../../utils/statusLabels'
 
@@ -86,7 +89,7 @@ const status = ref('')
 const typeOptions = toOptions(facilityTypeLabels)
 const statusOptions = toOptions(facilityStatusLabels)
 const list = useListView((p) => facilityService.list(p), {
-  searchFields: (f) => [f.id, f.facilityNo, f.location, labelOf(facilityTypeLabels, f.facilityType)],
+  searchFields: (f) => [f.id, f.location, locationLabel(f.location), labelOf(facilityTypeLabels, f.facilityType)],
   predicate: (f) => !status.value || f.facilityStatus === status.value,
   sort: (a, b) => (a.id ?? 0) - (b.id ?? 0),
   watchSources: [status],
@@ -107,9 +110,10 @@ const form = reactive({ facilityType: '', location: '' })
 const newStatus = ref('')
 const errors = reactive({})
 const locationOptions = computed(() => {
-  const names = new Set(LOCATION_OPTIONS)
-  if (editing.value?.location) names.add(editing.value.location)
-  return [...names].map((v) => ({ value: v, label: v }))
+  const options = [...LOCATION_OPTIONS]
+  const current = editing.value?.location
+  if (current && !options.some(option => option.value === current)) options.push({ value: current, label: current })
+  return options
 })
 function openCreate() {
   editing.value = null
@@ -135,7 +139,7 @@ async function saveForm() {
     if (!editing.value) return facilityService.create(payload)
     const f = editing.value
     if (payload.facilityType !== f.facilityType || payload.location !== f.location) await facilityService.update(f.id, payload)
-    if (newStatus.value !== f.facilityStatus) await facilityService.updateStatus(f.id, newStatus.value)
+    if (newStatus.value !== f.facilityStatus) await changeOperationStatus(facilityService, f.id, f.facilityStatus, newStatus.value)
     return true
   })
   if (!ok) return
@@ -157,7 +161,7 @@ function askRemoveFromForm() {
 function askRemoveByNumber() {
   toolbarError.value = ''
   const kw = list.keyword.value.trim().toLowerCase()
-  const hit = kw && list.items.value.find((f) => String(f.id) === kw || String(f.facilityNo ?? '').toLowerCase() === kw)
+  const hit = kw && list.items.value.find((f) => String(f.id) === kw || formatFacilityId(f.id).toLowerCase() === kw)
   if (!hit) {
     toolbarError.value = '삭제할 시설 번호를 정확히 입력한 뒤 삭제를 눌러 주세요.'
     return

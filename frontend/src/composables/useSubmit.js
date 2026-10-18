@@ -12,7 +12,7 @@ export function useSubmit() {
     error.value = null
     try {
       const result = await fn()
-      return result === undefined ? true : result
+      return result === undefined || result === null || result === '' ? true : result
     } catch (e) {
       error.value = parseError(e)
       return null

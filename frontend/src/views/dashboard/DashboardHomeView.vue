@@ -26,15 +26,16 @@
       <!-- 자전거 관리 -->
       <section class="flex min-h-0 flex-col rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 lg:overflow-hidden [&_td]:py-1! [&_th]:py-1! [&_.py-16]:py-6!">
         <div class="mb-2 flex items-center justify-between gap-2"><h2 class="font-bold">자전거 관리</h2><BaseButton size="xs" @click="openBikeForm(null)">자전거 등록</BaseButton></div>
-        <p v-if="bikes.failed" class="py-6 text-center text-sm text-gray-500">조회하지 못했습니다.</p>
+        <p v-if="bikes.loading" class="py-6 text-center text-sm text-gray-500">불러오는 중입니다.</p>
+        <p v-else-if="bikes.failed" class="py-6 text-center text-sm text-gray-500">조회하지 못했습니다.</p>
         <template v-else>
-          <PanelSearch v-model="bikeList.keyword.value" status-button :status-active="statusSort.bike" label="자전거 번호" placeholder="자전거 번호 입력" @search="bikeList.search" @status-click="toggleStatusSort('bike')" />
+          <PanelSearch v-model="bikeList.keyword.value" v-model:status="bikeList.status.value" :status-options="operationStatusOptions" label="자전거 번호" placeholder="자전거 번호 입력" @search="bikeList.search" />
           <EmptyState v-if="!bikeList.filtered.value.length" :title="bikeList.applied.value ? '검색 결과가 없습니다.' : '등록된 자전거가 없습니다.'" />
           <template v-else>
             <BaseTable>
               <template #head><tr><th class="px-3 py-2">자전거</th><th class="px-3 py-2">위치</th><th class="px-3 py-2">상태</th><th class="px-3 py-2 text-right">작업</th></tr></template>
               <tr v-for="b in bikeList.pageItems.value" :key="b.id">
-                <td class="px-3 py-2 font-medium">{{ formatBikeId(b.id) }}</td><td class="px-3 py-2">{{ b.location }}</td>
+                <td class="px-3 py-2 font-medium">{{ formatBikeId(b.id) }}</td><td class="px-3 py-2">{{ locationLabel(b.location) }}</td>
                 <td class="px-3 py-2">
                   <RotatingStatusButton :status="b.status" :labels="bikeStatusLabels" :busy="pending.has(`bike-${b.id}`)" @rotate="rotate('bike', b)" />
                 </td>
@@ -54,9 +55,10 @@
       <!-- 시설 관리 -->
       <section class="flex min-h-0 flex-col rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 lg:overflow-hidden [&_td]:py-1! [&_th]:py-1! [&_.py-16]:py-6!">
         <div class="mb-2 flex items-center justify-between gap-2"><h2 class="font-bold">기반시설 관리</h2><BaseButton size="xs" @click="openFacilityForm(null)">시설 등록</BaseButton></div>
-        <p v-if="facilities.failed" class="py-6 text-center text-sm text-gray-500">조회하지 못했습니다.</p>
+        <p v-if="facilities.loading" class="py-6 text-center text-sm text-gray-500">불러오는 중입니다.</p>
+        <p v-else-if="facilities.failed" class="py-6 text-center text-sm text-gray-500">조회하지 못했습니다.</p>
         <template v-else>
-          <PanelSearch v-model="facilityList.keyword.value" status-button :status-active="statusSort.facility" label="시설 번호" placeholder="시설 검색" @search="facilityList.search" @status-click="toggleStatusSort('facility')" />
+          <PanelSearch v-model="facilityList.keyword.value" v-model:status="facilityList.status.value" :status-options="facilityStatusOptions" label="시설 번호" placeholder="시설 검색" @search="facilityList.search" />
           <EmptyState v-if="!facilityList.filtered.value.length" :title="facilityList.applied.value ? '검색 결과가 없습니다.' : '등록된 시설이 없습니다.'" />
           <template v-else>
             <BaseTable>
@@ -82,7 +84,8 @@
       <!-- 회원 관리 (ADMIN) -->
       <section v-if="auth.isAdmin" class="flex min-h-0 flex-col rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 lg:overflow-hidden [&_td]:py-1! [&_th]:py-1! [&_.py-16]:py-6!">
         <div class="mb-2 flex min-h-7 items-center justify-between"><h2 class="font-bold">회원 관리</h2></div>
-        <p v-if="members.failed" class="py-6 text-center text-sm text-gray-500">조회하지 못했습니다.</p>
+        <p v-if="members.loading" class="py-6 text-center text-sm text-gray-500">불러오는 중입니다.</p>
+        <p v-else-if="members.failed" class="py-6 text-center text-sm text-gray-500">조회하지 못했습니다.</p>
         <template v-else>
           <PanelSearch v-model="memberList.keyword.value" v-model:status="memberList.status.value" :status-options="memberStatusOptions" label="아이디" placeholder="아이디 검색" @search="memberList.search" />
           <EmptyState v-if="!memberList.filtered.value.length" :title="memberList.applied.value ? '검색 결과가 없습니다.' : '회원이 없습니다.'" />
@@ -93,7 +96,7 @@
                 <td class="px-3 py-2 font-medium">{{ m.loginId }}</td><td class="px-3 py-2">{{ m.name }}</td>
                 <td class="px-3 py-2">{{ labelOf(memberRoleLabels, m.role) }}</td>
                 <td class="px-3 py-2">
-                  <RotatingStatusButton :status="m.status" :labels="memberStatusLabels" :rotation="MEMBER_ROTATION" :busy="pending.has(`member-${m.id}`)" :disabled="isMe(m)" @rotate="rotate('member', m)" />
+                  <RotatingStatusButton :status="m.status" :labels="memberStatusLabels" :rotation="MEMBER_ROTATION" :busy="pending.has(`member-${m.id}`)" :disabled="isMe(m) || m.role === 'ADMIN'" @rotate="rotate('member', m)" />
                 </td>
                 <td class="whitespace-nowrap px-3 py-2 text-right"><BaseButton size="xs" variant="secondary" :disabled="isMe(m)" @click="openRoleForm(m)">권한</BaseButton></td>
               </tr>
@@ -106,7 +109,8 @@
       <!-- Q&A 고객지원 관리 (ADMIN) -->
       <section v-if="auth.isAdmin" class="flex min-h-0 flex-col rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 lg:overflow-hidden [&_td]:py-1! [&_th]:py-1! [&_.py-16]:py-6!">
         <div class="mb-2 flex min-h-7 items-center justify-between"><h2 class="font-bold">Q&amp;A</h2></div>
-        <p v-if="qna.failed" class="py-6 text-center text-sm text-gray-500">조회하지 못했습니다.</p>
+        <p v-if="qna.loading" class="py-6 text-center text-sm text-gray-500">불러오는 중입니다.</p>
+        <p v-else-if="qna.failed" class="py-6 text-center text-sm text-gray-500">조회하지 못했습니다.</p>
         <template v-else>
           <PanelSearch v-model="qnaList.keyword.value" label="게시글 번호" placeholder="게시글 검색" @search="qnaList.search" />
           <EmptyState v-if="!qnaList.filtered.value.length" :title="qnaList.applied.value ? '검색 결과가 없습니다.' : '답변 대기 중인 질문이 없습니다.'" />
@@ -129,11 +133,12 @@
     <FacilityFormModal v-model="facilityForm.open" :facility="facilityForm.target" @saved="onSaved($event, loadFacilities)" />
     <MemberRoleModal v-model="roleForm.open" :member="roleForm.target" @saved="onSaved($event, loadMembers)" />
 
-    <p class="mt-6 text-xs text-gray-400">최근 정비 이력 요약은 전체 이력 조회 API 확정 후 추가합니다. (현재는 자전거·시설별 이력 화면에서 확인)</p>
+
   </div>
 </template>
 
 <script setup>
+import { locationLabel } from '../../constants/locations'
 import { computed, reactive, ref } from 'vue'
 import EmptyState from '../../components/common/EmptyState.vue'
 import BaseButton from '../../components/common/BaseButton.vue'
@@ -149,6 +154,7 @@ import MemberRoleModal from '../../components/dashboard/MemberRoleModal.vue'
 import { useAuthStore } from '../../stores/authStore'
 import { usePanelList } from '../../composables/usePanelList'
 import { bikeService } from '../../services/bikeService'
+import { changeOperationStatus } from '../../services/operationService'
 import { facilityService } from '../../services/facilityService'
 import { adminMemberService } from '../../services/memberService'
 import { qnaService } from '../../services/qnaService'
@@ -178,10 +184,12 @@ const bikes = makeState()
 const facilities = makeState()
 const members = makeState()
 const qna = makeState()
-const statusSort = reactive({ bike: false, facility: false }) // "상태" 버튼으로 상태별 정렬(GET /bike/status, /facilities/status)을 켬 상태
+const operationStatusOptions = toOptions(bikeStatusLabels)
+const facilityStatusOptions = toOptions(facilityStatusLabels)
 
 // 한 목록이 실패해도 나머지는 표시한다.
 async function fill(state, fetcher) {
+  state.loading = true
   state.failed = false
   try {
     const res = normalizeList(await fetcher())
@@ -194,8 +202,8 @@ async function fill(state, fetcher) {
   }
 }
 // 등록·수정 후 다시 불러올 수 있도록 함수로 둔다.
-const loadBikes = () => fill(bikes, () => (statusSort.bike ? bikeService.listByStatus() : bikeService.list()))
-const loadFacilities = () => fill(facilities, () => (statusSort.facility ? facilityService.listByStatus() : facilityService.list()))
+const loadBikes = () => fill(bikes, () => bikeService.list())
+const loadFacilities = () => fill(facilities, () => facilityService.list())
 const loadMembers = () => fill(members, () => adminMemberService.list())
 loadBikes()
 loadFacilities()
@@ -216,21 +224,21 @@ const cards = computed(() => {
   list.push(
     { icon: 'bike', title: '이용가능 자전거', to: '/dashboard/bikes', loading: bikes.loading, value: show(bikes, count(bikes, 'status', 'AVAILABLE')), unit: '대' },
     { icon: 'wrench', title: '정비중 자전거', to: '/dashboard/bikes', loading: bikes.loading, value: show(bikes, count(bikes, 'status', 'REPAIRING')), unit: '대' },
-    { icon: 'building', title: '정상 시설', to: '/dashboard/facilities', loading: facilities.loading, value: show(facilities, count(facilities, 'facilityStatus', 'AVAILABLE')), unit: '개' },
-    { icon: 'wrench', title: '정비중 시설', to: '/dashboard/facilities', loading: facilities.loading, value: show(facilities, count(facilities, 'facilityStatus', 'REPAIRING')), unit: '개' },
+    { icon: 'building', title: '이용가능 시설', to: '/dashboard/facilities', loading: facilities.loading, value: show(facilities, count(facilities, 'facilityStatus', 'AVAILABLE')), unit: '개' },
+    { icon: 'wrench', title: '점검중 시설', to: '/dashboard/facilities', loading: facilities.loading, value: show(facilities, count(facilities, 'facilityStatus', 'REPAIRING')), unit: '개' },
   )
   return list
 })
 
 // 상태를 눌러 바꿔도 행 위치가 달라지지 않도록 상태가 아닌 id 기준으로 정렬한다. (회원·Q&A 는 최신순)
-const bikeRows = computed(() => (statusSort.bike ? [...bikes.items] : [...bikes.items].sort((a, b) => a.id - b.id))) // 상태별 정렬 중에는 서버 순서 그대로
-const facilityRows = computed(() => (statusSort.facility ? [...facilities.items] : [...facilities.items].sort((a, b) => a.id - b.id)))
+const bikeRows = computed(() => [...bikes.items].sort((a, b) => a.id - b.id))
+const facilityRows = computed(() => [...facilities.items].sort((a, b) => a.id - b.id))
 const memberRows = computed(() => [...members.items].sort((a, b) => b.id - a.id))
 const qnaRows = computed(() => qna.items.filter((q) => q.status == null || q.status === 'WAITING').sort((a, b) => b.id - a.id))
 
 // 와이어프레임의 패널별 검색(자전거 번호 / 시설 / 회원 / 게시글) + 3건씩 페이징
-const bikeList = usePanelList(bikeRows, (b) => [b.id, formatBikeId(b.id), b.location], PAGE_SIZE)
-const facilityList = usePanelList(facilityRows, (f) => [f.id, formatFacilityId(f.id), f.location, labelOf(facilityTypeLabels, f.facilityType)], PAGE_SIZE)
+const bikeList = usePanelList(bikeRows, (b) => [b.id, formatBikeId(b.id), b.location, locationLabel(b.location)], PAGE_SIZE, (b) => b.status)
+const facilityList = usePanelList(facilityRows, (f) => [f.id, formatFacilityId(f.id), f.location, locationLabel(f.location), labelOf(facilityTypeLabels, f.facilityType)], PAGE_SIZE, (f) => f.facilityStatus)
 const memberList = usePanelList(memberRows, (m) => [m.id, m.loginId, m.name, m.email], PAGE_SIZE, (m) => m.status)
 const qnaList = usePanelList(qnaRows, (q) => [q.id, q.title], PAGE_SIZE)
 
@@ -248,7 +256,7 @@ function onSaved(message, reload) {
   reload()
 }
 
-// ---- 상태 배지 클릭 → 이용가능 → 운영중지 → 정비중 순환 ----
+// ---- 상태 배지 클릭 → 이용가능 → 이용불가 → 정비중 순환 ----
 const pending = reactive(new Set()) // 요청 중인 행 ("bike-3"): 중복 클릭 방지
 const notice = ref('')
 const statusError = ref('')
@@ -259,37 +267,23 @@ function flash(msg) {
   noticeTimer = setTimeout(() => (notice.value = ''), 4000)
 }
 
-// "상태" 버튼: 누르면 상태별 정렬 목록(GET /api/bike/status, /api/facilities/status)을 불러오고, 다시 누르면 기본 목록으로 돌아간다.
-async function toggleStatusSort(kind) {
-  const isBike = kind === 'bike'
-  const state = isBike ? bikes : facilities
-  const service = isBike ? bikeService : facilityService
-  const panel = isBike ? bikeList : facilityList
-  const next = !statusSort[kind]
-  statusError.value = ''
-  try {
-    const res = normalizeList(await (next ? service.listByStatus() : service.list()))
-    state.items = res.items
-    state.total = res.total
-    statusSort[kind] = next
-    panel.page.value = 1
-  } catch (e) {
-    statusError.value = `목록을 정렬하지 못했습니다. ${parseError(e).message}`
-  }
+async function rotate(kind, item) {
+  const next = kind === 'member' ? nextIn(MEMBER_ROTATION, item.status) : nextStatus(kind === 'bike' ? item.status : item.facilityStatus)
+  return changeStatus(kind, item, next)
 }
 
-async function rotate(kind, item) {
+async function changeStatus(kind, item, next) {
   const key = `${kind}-${item.id}`
   if (pending.has(key)) return
   const isBike = kind === 'bike'
   const isMember = kind === 'member'
-  const next = isMember ? nextIn(MEMBER_ROTATION, item.status) : nextStatus(isBike ? item.status : item.facilityStatus)
+  if (!next || next === (isBike || isMember ? item.status : item.facilityStatus)) return
   pending.add(key)
   statusError.value = ''
   try {
     if (isMember) await adminMemberService.updateStatus(item.id, next)
-    else if (isBike) await bikeService.updateStatus(item.id, next)
-    else await facilityService.updateStatus(item.id, next)
+    else if (isBike) await changeOperationStatus(bikeService, item.id, item.status, next)
+    else await changeOperationStatus(facilityService, item.id, item.facilityStatus, next)
     // 서버가 성공을 응답한 뒤에만 화면 값을 바꾼다. (실패하면 이전 상태 그대로)
     if (isBike || isMember) item.status = next
     else item.facilityStatus = next

@@ -4,15 +4,7 @@
     <p class="mb-6 mt-2 text-center text-sm text-gray-600">회원 정보를 입력해 주세요.</p>
 
     <form class="space-y-4" novalidate @submit.prevent="submit">
-      <div>
-        <div class="flex items-end gap-2">
-          <div class="flex-1"><BaseInput v-model="form.loginId" label="아이디" required autocomplete="username" hint="4~20자" :error="errors.loginId" @input="idCheck = ''" /></div>
-          <BaseButton variant="secondary" :loading="checking" @click="checkId">중복확인</BaseButton>
-        </div>
-        <p v-if="idCheck === 'ok'" class="mt-1 text-sm text-green-700" role="status">사용 가능한 아이디입니다.</p>
-        <p v-else-if="idCheck === 'dup'" class="mt-1 text-sm text-red-600" role="alert">이미 사용 중인 아이디입니다.</p>
-        <p v-else-if="idCheck === 'unavailable'" class="mt-1 text-sm text-amber-700">중복확인 API가 아직 연결되지 않았습니다. 가입 시 서버에서 확인합니다.</p>
-      </div>
+      <BaseInput v-model="form.loginId" label="아이디" required autocomplete="username" hint="4~20자 · 가입 시 중복 여부를 확인합니다." :error="errors.loginId" />
       <BaseInput v-model="form.password" label="비밀번호" type="password" required autocomplete="new-password" :hint="PASSWORD_RULE_TEXT" :error="errors.password" />
       <BaseInput v-model="form.passwordCheck" label="비밀번호 확인" type="password" required autocomplete="new-password" :error="errors.passwordCheck" />
       <BaseInput v-model="form.name" label="이름" required :error="errors.name" />
@@ -36,14 +28,13 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseInput from '../../components/common/BaseInput.vue'
 import BaseButton from '../../components/common/BaseButton.vue'
 import FormFieldError from '../../components/common/FormFieldError.vue'
 import { memberService } from '../../services/memberService'
 import { useSubmit } from '../../composables/useSubmit'
-import { parseError } from '../../utils/errors'
 import { PASSWORD_RULE_TEXT, validateEmail, validateLoginId, validatePassword, required } from '../../utils/validators'
 
 const router = useRouter()
@@ -52,25 +43,6 @@ const { submitting, error, run } = useSubmit()
 // role / status 는 요청에 포함하지 않는다. (서버가 USER / ACTIVE 로 지정)
 const form = reactive({ loginId: '', password: '', passwordCheck: '', name: '', email: '', tel: '', termsAgreed: false, privacyAgreed: false })
 const errors = reactive({})
-
-// 아이디 중복확인 (API 미확정: 404/405 이면 안내만 하고 가입 시 서버가 검증)
-const checking = ref(false)
-const idCheck = ref('') // '' | ok | dup | unavailable
-async function checkId() {
-  errors.loginId = validateLoginId(form.loginId.trim())
-  if (errors.loginId) return
-  checking.value = true
-  try {
-    const res = await memberService.checkLoginId(form.loginId.trim())
-    const available = typeof res === 'boolean' ? res : (res?.available ?? !res?.duplicated)
-    idCheck.value = available ? 'ok' : 'dup'
-  } catch (e) {
-    idCheck.value = [404, 405].includes(e.response?.status) ? 'unavailable' : ''
-    if (!idCheck.value) errors.loginId = parseError(e).message
-  } finally {
-    checking.value = false
-  }
-}
 
 function validate() {
   Object.keys(errors).forEach((k) => delete errors[k])

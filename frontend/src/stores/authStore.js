@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { memberService } from '../services/memberService'
-import { clearCsrf, refreshCsrf } from '../services/api'
 
 // 권한은 브라우저에 저장한 문자열이 아니라 GET /api/members/me 의 서버 응답으로만 판단한다.
 export const useAuthStore = defineStore('auth', {
@@ -33,8 +32,6 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       try {
         await memberService.login(credentials)
-        clearCsrf() // 로그인 후 세션이 바뀌므로 CSRF 토큰 재발급
-        await refreshCsrf()
         const me = await this.refreshMe()
         if (!me) throw new Error('로그인 후 사용자 정보를 확인하지 못했습니다.')
         return me
@@ -47,12 +44,10 @@ export const useAuthStore = defineStore('auth', {
         await memberService.logout()
       } finally {
         this.currentUser = null
-        clearCsrf()
       }
     },
     clearSession() {
       this.currentUser = null
-      clearCsrf()
     },
   },
 })

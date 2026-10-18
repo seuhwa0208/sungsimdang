@@ -1,65 +1,65 @@
 <template>
-  <div>
-    <PageHeader title="기반시설 현황" description="엘리베이터·스크린도어·자전거 대여소 등 시설의 현재 상태입니다." />
+  <div class="space-y-6">
+    <div class="flex items-start justify-between gap-3">
+      <div><p class="text-xs font-semibold tracking-wide text-brand-600">교통 인프라</p><h1 class="mt-1 text-2xl font-bold tracking-tight text-gray-900">기반시설 현황</h1><p class="mt-2 text-sm text-gray-500">역을 선택해 이용할 수 있는 시설을 확인하세요.</p></div>
+      <RouterLink to="/" class="text-sm text-gray-500 hover:text-brand-700">홈으로 〉</RouterLink>
+    </div>
 
-    <ListToolbar v-model="list.keyword.value" placeholder="시설 번호·위치 검색" @search="list.search" @reset="list.reset(resetFilters)">
-      <div class="w-40"><BaseSelect v-model="type" :options="typeOptions" placeholder="전체 유형" label="유형" /></div>
-      <div class="w-40"><BaseSelect v-model="status" :options="statusOptions" placeholder="전체 상태" label="상태" /></div>
-    </ListToolbar>
+    <form class="flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-white p-5" @submit.prevent="search">
+      <div class="w-full sm:w-44"><BaseSelect v-model="type" :options="typeOptions" placeholder="전체 유형" label="시설 유형" /></div>
+      <div class="min-w-0 flex-1 sm:max-w-sm"><BaseSelect v-model="location" :options="LOCATION_OPTIONS" placeholder="전체 역" label="위치" /></div>
+      <BaseButton type="submit">검색</BaseButton><BaseButton variant="secondary" @click="list.reset(resetFilters)">초기화</BaseButton>
+    </form>
 
     <LoadingState v-if="list.loading.value" />
     <ErrorState v-else-if="list.error.value" :error="list.error.value" @retry="list.load" />
-    <EmptyState v-else-if="!list.pageItems.value.length" :title="list.keyword.value || type || status ? '검색 결과가 없습니다.' : '등록된 시설이 없습니다.'" />
-    <template v-else>
-      <p class="mb-2 text-sm text-gray-600">
-        총 {{ list.items.value.length }}개 <span v-for="s in summary" :key="s.key" class="ml-2">| {{ s.label }} {{ s.count }}개</span>
-      </p>
-      <BaseTable>
-        <template #head>
-          <tr><th class="px-4 py-3">시설 번호</th><th class="px-4 py-3">유형</th><th class="px-4 py-3">위치</th><th class="px-4 py-3">상태</th></tr>
-        </template>
-        <tr v-for="f in list.pageItems.value" :key="f.id" class="cursor-pointer hover:bg-gray-50" @click="$router.push(`/facilities/${f.id}`)">
-          <td class="px-4 py-3 font-medium">{{ f.facilityNo || '-' }}</td>
-          <td class="px-4 py-3">{{ labelOf(facilityTypeLabels, f.facilityType) }}</td>
-          <td class="px-4 py-3">{{ f.location }}</td>
-          <td class="px-4 py-3"><FacilityStatusBadge :status="f.facilityStatus" /></td>
-        </tr>
-      </BaseTable>
-      <BasePagination v-model:page="list.page.value" :total-pages="list.totalPages.value" />
-    </template>
+    <section v-else class="overflow-hidden rounded-xl border border-gray-200 bg-white" aria-label="시설 목록">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 px-5 py-5">
+        <h2 class="font-bold text-gray-900">시설 목록</h2>
+      </div>
+      <EmptyState v-if="!list.pageItems.value.length" :title="appliedLocation || type ? '선택한 조건에 이용가능한 시설이 없습니다.' : '이용가능한 시설이 없습니다.'" />
+      <template v-else>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-sky-50 text-xs text-gray-600"><tr><th class="px-5 py-3 font-medium">ID</th><th class="px-5 py-3 font-medium">시설명</th><th class="px-5 py-3 font-medium">유형</th><th class="px-5 py-3 font-medium">위치</th></tr></thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr v-for="facility in list.pageItems.value" :key="facility.id" class="hover:bg-gray-50">
+                <td class="px-5 py-4 text-gray-500">{{ facility.id }}</td>
+                <td class="whitespace-nowrap px-5 py-4 font-medium text-gray-900">{{ facilityName(facility) }}</td>
+                <td class="whitespace-nowrap px-5 py-4 text-gray-600">{{ labelOf(facilityTypeLabels, facility.facilityType) }}</td>
+                <td class="whitespace-nowrap px-5 py-4 text-gray-600">{{ locationLabel(facility.location) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="border-t border-gray-100 px-4 pb-5"><BasePagination v-model:page="list.page.value" :total-pages="list.totalPages.value" /></div>
+      </template>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-import PageHeader from '../../components/common/PageHeader.vue'
-import ListToolbar from '../../components/common/ListToolbar.vue'
+import { ref } from 'vue'
+import BaseButton from '../../components/common/BaseButton.vue'
 import BaseSelect from '../../components/common/BaseSelect.vue'
+import BasePagination from '../../components/common/BasePagination.vue'
 import LoadingState from '../../components/common/LoadingState.vue'
 import ErrorState from '../../components/common/ErrorState.vue'
 import EmptyState from '../../components/common/EmptyState.vue'
-import BaseTable from '../../components/common/BaseTable.vue'
-import BasePagination from '../../components/common/BasePagination.vue'
-import FacilityStatusBadge from '../../components/facility/FacilityStatusBadge.vue'
 import { useListView } from '../../composables/useListView'
 import { facilityService } from '../../services/facilityService'
-import { facilityStatusLabels, facilityTypeLabels, labelOf, toOptions } from '../../utils/statusLabels'
+import { LOCATION_OPTIONS, locationLabel } from '../../constants/locations'
+import { facilityTypeLabels, labelOf, toOptions } from '../../utils/statusLabels'
+import { facilityName } from '../../utils/format'
 
 const type = ref('')
-const status = ref('')
+const location = ref('')
+const appliedLocation = ref('')
 const typeOptions = toOptions(facilityTypeLabels)
-const statusOptions = toOptions(facilityStatusLabels)
-const resetFilters = () => {
-  type.value = ''
-  status.value = ''
-}
-const list = useListView((p) => facilityService.memberList(p), {
-  searchFields: (f) => [f.facilityNo, f.location],
-  predicate: (f) => (!type.value || f.facilityType === type.value) && (!status.value || f.facilityStatus === status.value),
-  sort: (a, b) => (a.id ?? 0) - (b.id ?? 0),
-  watchSources: [type, status],
+const resetFilters = () => { type.value = ''; location.value = ''; appliedLocation.value = '' }
+function search() { appliedLocation.value = location.value; list.search() }
+const list = useListView(() => facilityService.memberList(), {
+  predicate: facility => facility.facilityStatus === 'AVAILABLE' && (!type.value || facility.facilityType === type.value) && (!appliedLocation.value || facility.location === appliedLocation.value),
+  watchSources: [type, appliedLocation],
 })
-const summary = computed(() =>
-  Object.entries(facilityStatusLabels).map(([key, label]) => ({ key, label, count: list.items.value.filter((f) => f.facilityStatus === key).length })),
-)
 </script>
