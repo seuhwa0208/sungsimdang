@@ -1,31 +1,31 @@
 <template>
-  <div>
-    <div class="mb-6 flex flex-wrap items-end justify-between gap-2">
+  <div class="flex flex-1 flex-col lg:min-h-0">
+    <div class="mb-3 flex flex-wrap items-center justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">관리자 통합 운영현황</h1>
         <p class="mt-1 text-sm text-gray-500">타슈 및 관련 시설의 운영 현황을 한눈에 확인할 수 있습니다.</p>
       </div>
-      <p class="text-xs text-gray-400">기준일시 {{ asOf }}</p>
+      <!-- 요약 카드: 전용 통계 API 가 없으므로 기존 목록 API 응답으로만 집계 -->
+      <div class="flex flex-wrap items-center gap-2">
+        <RouterLink v-for="c in cards" :key="c.title" :to="c.to" class="flex items-center gap-2 rounded-md bg-white px-3 py-1.5 shadow-sm ring-1 ring-gray-200 transition hover:ring-brand-500">
+          <StatIcon :name="c.icon" class="h-5! w-5!" />
+          <div class="min-w-0">
+            <p class="text-[11px] font-medium leading-tight text-gray-500">{{ c.title }}</p>
+            <p class="text-base font-bold leading-tight text-gray-900">{{ c.loading ? '…' : c.value }}<span class="ml-0.5 text-xs font-normal text-gray-500">{{ c.unit }}</span></p>
+          </div>
+        </RouterLink>
+      </div>
     </div>
 
-    <p v-if="notice" class="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-800" role="status">{{ notice }}</p>
-    <p v-if="statusError" class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700" role="alert">{{ statusError }}</p>
+    <p v-if="notice" class="fixed bottom-4 left-1/2 z-40 -translate-x-1/2 rounded-md bg-green-50 px-4 py-2 text-sm text-green-800 shadow-lg ring-1 ring-green-200" role="status">{{ notice }}</p>
+    <p v-if="statusError" class="fixed bottom-4 left-1/2 z-40 -translate-x-1/2 rounded-md bg-red-50 px-4 py-2 text-sm text-red-700 shadow-lg ring-1 ring-red-200" role="alert">{{ statusError }}</p>
 
-    <!-- 요약 카드: 전용 통계 API 가 없으므로 기존 목록 API 응답으로만 집계 -->
-    <div class="grid grid-cols-2 gap-3 lg:grid-cols-5">
-      <RouterLink v-for="c in cards" :key="c.title" :to="c.to" class="flex items-center gap-3 rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200 transition hover:ring-brand-500">
-        <StatIcon :name="c.icon" />
-        <div class="min-w-0">
-          <p class="text-xs font-medium text-gray-500">{{ c.title }}</p>
-          <p class="mt-1 text-2xl font-bold text-gray-900">{{ c.loading ? '…' : c.value }}<span class="ml-0.5 text-sm font-normal text-gray-500">{{ c.unit }}</span></p>
-        </div>
-      </RouterLink>
-    </div>
 
-    <div class="mt-6 grid gap-4 xl:grid-cols-2">
+
+    <div :class="['grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-2', auth.isAdmin ? 'lg:grid-rows-2' : 'lg:grid-rows-1']">
       <!-- 자전거 관리 -->
-      <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
-        <div class="mb-3 flex items-center justify-between gap-2"><h2 class="font-bold">자전거 관리</h2><div class="flex items-center gap-3"><BaseButton size="sm" @click="openBikeForm(null)">자전거 등록</BaseButton></div></div>
+      <section class="flex min-h-0 flex-col rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 lg:overflow-hidden [&_td]:py-1! [&_th]:py-1! [&_.py-16]:py-6!">
+        <div class="mb-2 flex items-center justify-between gap-2"><h2 class="font-bold">자전거 관리</h2><BaseButton size="xs" @click="openBikeForm(null)">자전거 등록</BaseButton></div>
         <p v-if="bikes.failed" class="py-6 text-center text-sm text-gray-500">조회하지 못했습니다.</p>
         <template v-else>
           <PanelSearch v-model="bikeList.keyword.value" status-button :status-active="statusSort.bike" label="자전거 번호" placeholder="자전거 번호 입력" @search="bikeList.search" @status-click="toggleStatusSort('bike')" />
@@ -40,20 +40,20 @@
                 </td>
                 <td class="whitespace-nowrap px-3 py-2">
                   <div class="flex justify-end gap-1.5">
-                    <BaseButton size="sm" variant="secondary" @click="openBikeForm(b)">정보 수정</BaseButton>
-                    <BaseButton size="sm" variant="secondary" @click="$router.push(`/dashboard/bikes/${b.id}/maintenance`)">고장 접수</BaseButton>
+                    <BaseButton size="xs" variant="secondary" @click="openBikeForm(b)">정보 수정</BaseButton>
+                    <BaseButton size="xs" variant="secondary" @click="$router.push(`/dashboard/bikes/${b.id}/maintenance`)">고장 접수</BaseButton>
                   </div>
                 </td>
               </tr>
             </BaseTable>
-            <BasePagination v-model:page="bikeList.page.value" :total-pages="bikeList.totalPages.value" :max-visible="5" always />
+            <BasePagination v-model:page="bikeList.page.value" :total-pages="bikeList.totalPages.value" :max-visible="5" always compact class="mt-auto" />
           </template>
         </template>
       </section>
 
       <!-- 시설 관리 -->
-      <section class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
-        <div class="mb-3 flex items-center justify-between gap-2"><h2 class="font-bold">기반시설 관리</h2><div class="flex items-center gap-3"><BaseButton size="sm" @click="openFacilityForm(null)">시설 등록</BaseButton></div></div>
+      <section class="flex min-h-0 flex-col rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 lg:overflow-hidden [&_td]:py-1! [&_th]:py-1! [&_.py-16]:py-6!">
+        <div class="mb-2 flex items-center justify-between gap-2"><h2 class="font-bold">기반시설 관리</h2><BaseButton size="xs" @click="openFacilityForm(null)">시설 등록</BaseButton></div>
         <p v-if="facilities.failed" class="py-6 text-center text-sm text-gray-500">조회하지 못했습니다.</p>
         <template v-else>
           <PanelSearch v-model="facilityList.keyword.value" status-button :status-active="statusSort.facility" label="시설 번호" placeholder="시설 검색" @search="facilityList.search" @status-click="toggleStatusSort('facility')" />
@@ -62,26 +62,26 @@
             <BaseTable>
               <template #head><tr><th class="px-3 py-2">시설</th><th class="px-3 py-2">유형</th><th class="px-3 py-2">상태</th><th class="px-3 py-2 text-right">작업</th></tr></template>
               <tr v-for="f in facilityList.pageItems.value" :key="f.id">
-                <td class="px-3 py-2 font-medium">{{ f.facilityNo || f.location }}</td><td class="px-3 py-2">{{ labelOf(facilityTypeLabels, f.facilityType) }}</td>
+                <td class="px-3 py-2 font-medium">{{ formatFacilityId(f.id) }}</td><td class="px-3 py-2">{{ labelOf(facilityTypeLabels, f.facilityType) }}</td>
                 <td class="px-3 py-2">
                   <RotatingStatusButton :status="f.facilityStatus" :labels="facilityStatusLabels" :busy="pending.has(`facility-${f.id}`)" @rotate="rotate('facility', f)" />
                 </td>
                 <td class="whitespace-nowrap px-3 py-2">
                   <div class="flex justify-end gap-1.5">
-                    <BaseButton size="sm" variant="secondary" @click="openFacilityForm(f)">정보 수정</BaseButton>
-                    <BaseButton size="sm" variant="secondary" @click="$router.push(`/dashboard/facilities/${f.id}/maintenance`)">점검 등록</BaseButton>
+                    <BaseButton size="xs" variant="secondary" @click="openFacilityForm(f)">정보 수정</BaseButton>
+                    <BaseButton size="xs" variant="secondary" @click="$router.push(`/dashboard/facilities/${f.id}/maintenance`)">점검 등록</BaseButton>
                   </div>
                 </td>
               </tr>
             </BaseTable>
-            <BasePagination v-model:page="facilityList.page.value" :total-pages="facilityList.totalPages.value" :max-visible="5" always />
+            <BasePagination v-model:page="facilityList.page.value" :total-pages="facilityList.totalPages.value" :max-visible="5" always compact class="mt-auto" />
           </template>
         </template>
       </section>
 
       <!-- 회원 관리 (ADMIN) -->
-      <section v-if="auth.isAdmin" class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
-        <div class="mb-3 flex items-center justify-between"><h2 class="font-bold">회원 관리</h2></div>
+      <section v-if="auth.isAdmin" class="flex min-h-0 flex-col rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 lg:overflow-hidden [&_td]:py-1! [&_th]:py-1! [&_.py-16]:py-6!">
+        <div class="mb-2 flex min-h-7 items-center justify-between"><h2 class="font-bold">회원 관리</h2></div>
         <p v-if="members.failed" class="py-6 text-center text-sm text-gray-500">조회하지 못했습니다.</p>
         <template v-else>
           <PanelSearch v-model="memberList.keyword.value" v-model:status="memberList.status.value" :status-options="memberStatusOptions" label="아이디" placeholder="아이디 검색" @search="memberList.search" />
@@ -95,17 +95,17 @@
                 <td class="px-3 py-2">
                   <RotatingStatusButton :status="m.status" :labels="memberStatusLabels" :rotation="MEMBER_ROTATION" :busy="pending.has(`member-${m.id}`)" :disabled="isMe(m)" @rotate="rotate('member', m)" />
                 </td>
-                <td class="whitespace-nowrap px-3 py-2 text-right"><BaseButton size="sm" variant="secondary" :disabled="isMe(m)" @click="openRoleForm(m)">권한</BaseButton></td>
+                <td class="whitespace-nowrap px-3 py-2 text-right"><BaseButton size="xs" variant="secondary" :disabled="isMe(m)" @click="openRoleForm(m)">권한</BaseButton></td>
               </tr>
             </BaseTable>
-            <BasePagination v-model:page="memberList.page.value" :total-pages="memberList.totalPages.value" :max-visible="5" always />
+            <BasePagination v-model:page="memberList.page.value" :total-pages="memberList.totalPages.value" :max-visible="5" always compact class="mt-auto" />
           </template>
         </template>
       </section>
 
       <!-- Q&A 고객지원 관리 (ADMIN) -->
-      <section v-if="auth.isAdmin" class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-200">
-        <div class="mb-3 flex items-center justify-between"><h2 class="font-bold">Q&amp;A</h2></div>
+      <section v-if="auth.isAdmin" class="flex min-h-0 flex-col rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 lg:overflow-hidden [&_td]:py-1! [&_th]:py-1! [&_.py-16]:py-6!">
+        <div class="mb-2 flex min-h-7 items-center justify-between"><h2 class="font-bold">Q&amp;A</h2></div>
         <p v-if="qna.failed" class="py-6 text-center text-sm text-gray-500">조회하지 못했습니다.</p>
         <template v-else>
           <PanelSearch v-model="qnaList.keyword.value" label="게시글 번호" placeholder="게시글 검색" @search="qnaList.search" />
@@ -116,10 +116,10 @@
               <tr v-for="q in qnaList.pageItems.value" :key="q.id">
                 <td class="whitespace-nowrap px-3 py-2 text-gray-500">{{ q.id }}</td><td class="px-3 py-2">{{ q.title }}</td>
                 <td class="whitespace-nowrap px-3 py-2"><StatusBadge :label="labelOf(qnaStatusLabels, q.status)" :tone="statusTone[q.status]" /></td>
-                <td class="whitespace-nowrap px-3 py-2 text-right"><BaseButton size="sm" variant="secondary" @click="$router.push(`/qna/${q.id}`)">답변 작성</BaseButton></td>
+                <td class="whitespace-nowrap px-3 py-2 text-right"><BaseButton size="xs" variant="secondary" @click="$router.push(`/qna/${q.id}`)">답변 작성</BaseButton></td>
               </tr>
             </BaseTable>
-            <BasePagination v-model:page="qnaList.page.value" :total-pages="qnaList.totalPages.value" :max-visible="5" always />
+            <BasePagination v-model:page="qnaList.page.value" :total-pages="qnaList.totalPages.value" :max-visible="5" always compact class="mt-auto" />
           </template>
         </template>
       </section>
@@ -154,8 +154,7 @@ import { adminMemberService } from '../../services/memberService'
 import { qnaService } from '../../services/qnaService'
 import { normalizeList } from '../../utils/list'
 import { parseError } from '../../utils/errors'
-import { formatBikeId } from '../../utils/format'
-import { formatDateTime } from '../../utils/formatDate'
+import { formatBikeId, formatFacilityId } from '../../utils/format'
 import {
   bikeStatusLabels,
   facilityStatusLabels,
@@ -180,7 +179,6 @@ const facilities = makeState()
 const members = makeState()
 const qna = makeState()
 const statusSort = reactive({ bike: false, facility: false }) // "상태" 버튼으로 상태별 정렬(GET /bike/status, /facilities/status)을 켬 상태
-const asOf = formatDateTime(new Date().toISOString()) // 데이터를 조회한 시각
 
 // 한 목록이 실패해도 나머지는 표시한다.
 async function fill(state, fetcher) {
@@ -232,7 +230,7 @@ const qnaRows = computed(() => qna.items.filter((q) => q.status == null || q.sta
 
 // 와이어프레임의 패널별 검색(자전거 번호 / 시설 / 회원 / 게시글) + 3건씩 페이징
 const bikeList = usePanelList(bikeRows, (b) => [b.id, formatBikeId(b.id), b.location], PAGE_SIZE)
-const facilityList = usePanelList(facilityRows, (f) => [f.id, f.facilityNo, f.location, labelOf(facilityTypeLabels, f.facilityType)], PAGE_SIZE)
+const facilityList = usePanelList(facilityRows, (f) => [f.id, formatFacilityId(f.id), f.location, labelOf(facilityTypeLabels, f.facilityType)], PAGE_SIZE)
 const memberList = usePanelList(memberRows, (m) => [m.id, m.loginId, m.name, m.email], PAGE_SIZE, (m) => m.status)
 const qnaList = usePanelList(qnaRows, (q) => [q.id, q.title], PAGE_SIZE)
 
@@ -295,7 +293,7 @@ async function rotate(kind, item) {
     // 서버가 성공을 응답한 뒤에만 화면 값을 바꾼다. (실패하면 이전 상태 그대로)
     if (isBike || isMember) item.status = next
     else item.facilityStatus = next
-    const name = isMember ? `회원 ${item.loginId}` : isBike ? `자전거 ${formatBikeId(item.id)}` : `시설 ${item.facilityNo || item.id}`
+    const name = isMember ? `회원 ${item.loginId}` : isBike ? `자전거 ${formatBikeId(item.id)}` : `시설 ${formatFacilityId(item.id)}`
     const labels = isMember ? memberStatusLabels : isBike ? bikeStatusLabels : facilityStatusLabels
     flash(`${name} 상태를 '${labelOf(labels, next)}'(으)로 변경했습니다.`)
   } catch (e) {

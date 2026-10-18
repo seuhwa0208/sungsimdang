@@ -17,12 +17,12 @@
 defineProps({
   type: { type: String, default: 'button' },
   variant: { type: String, default: 'primary' }, // primary | secondary | danger | ghost
-  size: { type: String, default: 'md' }, // sm | md
+  size: { type: String, default: 'md' }, // xs | sm | md
   loading: Boolean,
   disabled: Boolean,
 })
 
-const sizes = { sm: 'min-h-8 px-3 text-sm', md: 'min-h-10 px-4 text-sm' }
+const sizes = { xs: 'min-h-7 px-2.5 text-sm', sm: 'min-h-8 px-3 text-sm', md: 'min-h-10 px-4 text-sm' }
 const variants = {
   primary: 'bg-brand-600 text-white hover:bg-brand-700',
   secondary: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50',

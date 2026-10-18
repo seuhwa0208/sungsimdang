@@ -1,13 +1,13 @@
 <template>
   <!-- 와이어프레임의 패널 검색줄: [라벨 + 입력(회색 안내 글씨)] [상태 선택 또는 상태 버튼] [검색] -->
-  <form class="mb-3 flex flex-wrap items-end gap-2" role="search" @submit.prevent="emit('search')">
+  <form class="mb-2 flex flex-wrap items-end gap-2" role="search" @submit.prevent="emit('search')">
     <div class="min-w-36 flex-1">
       <label :for="inputId" class="mb-1 block text-xs font-medium text-gray-700">{{ label }}</label>
       <input
         :id="inputId"
         :value="modelValue"
         :placeholder="placeholder"
-        class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
+        class="w-full rounded-md border border-gray-300 px-3 py-1 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
         @input="emit('update:modelValue', $event.target.value)"
       />
     </div>
@@ -16,15 +16,15 @@
       <select
         :id="selectId"
         :value="status"
-        class="w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+        class="w-full rounded-md border border-gray-300 bg-white px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
         @change="emit('update:status', $event.target.value)"
       >
         <option value="">전체</option>
         <option v-for="o in statusOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
       </select>
     </div>
-    <BaseButton v-if="statusButton" size="sm" type="button" :variant="statusActive ? 'primary' : 'secondary'" :aria-pressed="statusActive" @click="emit('status-click')">상태</BaseButton>
-    <BaseButton size="sm" type="submit">검색</BaseButton>
+    <BaseButton v-if="statusButton" size="xs" type="button" :variant="statusActive ? 'primary' : 'secondary'" :aria-pressed="statusActive" @click="emit('status-click')">상태</BaseButton>
+    <BaseButton size="xs" type="submit">검색</BaseButton>
   </form>
 </template>
 
