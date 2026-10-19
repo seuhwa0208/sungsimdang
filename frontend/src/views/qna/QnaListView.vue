@@ -36,7 +36,7 @@
           <td v-if="auth.isAdmin" class="px-4 py-3 text-right text-xs font-medium text-brand-600">{{ q.status === 'WAITING' ? '답변 등록' : '답변 수정' }}</td>
         </tr>
       </BaseTable>
-      <BasePagination v-model:page="list.page.value" :total-pages="list.totalPages.value" />
+      <BasePagination v-model:page="list.page.value" :total-pages="list.totalPages.value" boundary-links />
     </template>
   </div>
 </template>

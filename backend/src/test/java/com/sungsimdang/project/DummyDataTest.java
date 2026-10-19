@@ -1,21 +1,22 @@
 package com.sungsimdang.project;
 
-import com.sungsimdang.project.bike.domain.Bike;
-import com.sungsimdang.project.bike.domain.BikeLocation;
+import com.sungsimdang.project.bike.domain.*;
 import com.sungsimdang.project.bike.repository.BikeMaintenanceRepository;
 import com.sungsimdang.project.bike.repository.BikeRepository;
 import com.sungsimdang.project.board.domain.DataFiles;
 import com.sungsimdang.project.board.domain.Notice;
 import com.sungsimdang.project.board.domain.Qna;
+import com.sungsimdang.project.board.domain.QnaStatus;
+import com.sungsimdang.project.board.dto.QnaAnswerRequest;
 import com.sungsimdang.project.board.repository.DataFilesRepository;
 import com.sungsimdang.project.board.repository.NoticeRepository;
 import com.sungsimdang.project.board.repository.QnaRepository;
-import com.sungsimdang.project.facility.domain.Facility;
-import com.sungsimdang.project.facility.domain.FacilityLocation;
-import com.sungsimdang.project.facility.domain.FacilityType;
+import com.sungsimdang.project.board.service.QnaService;
+import com.sungsimdang.project.facility.domain.*;
 import com.sungsimdang.project.facility.repository.FacilityMaintenanceRepository;
 import com.sungsimdang.project.facility.repository.FacilityRepository;
 import com.sungsimdang.project.member.domain.Member;
+import com.sungsimdang.project.member.domain.MemberRole;
 import com.sungsimdang.project.member.repository.MemberRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,9 @@ public class DummyDataTest {
 
     @Autowired
     private FacilityMaintenanceRepository facilityMaintenanceRepository;
+
+    @Autowired
+    private QnaService qnaService;
 
     @Test
     void insertDummyData() {
@@ -150,4 +154,68 @@ public class DummyDataTest {
         System.out.println("더미 멤버 10000건 추가 완료");
     }
 
+<<<<<<< HEAD
+=======
+    @Test
+    void insertDummyDataBikeMaintenance() {
+        List<Bike> bikes = bikeRepository.findAll();
+        Member member = memberRepository.findAll().stream()
+                .filter(m -> m.getRole() == MemberRole.ADMIN
+                        || m.getRole() == MemberRole.MANAGER)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("정비 담당자가 없습니다."));
+        for (Bike bike : bikes) {
+            BikeMaintenance maintenance = BikeMaintenance.builder()
+                    .bike(bike)
+                    .member(member)
+                    .bikeFaultType(BikeFaultType.BRAKE)
+                    .status(BikeStatus.AVAILABLE)
+                    .build();
+            bikeMaintenanceRepository.save(maintenance);
+        }
+        System.out.println("자전거별 정비 이력 생성 완료: " + bikes.size() + "건");
+    }
+    @Test
+    void insertDummyDataFacilityMaintenance() {
+        List<Facility> facilities = facilityRepository.findAll();
+        Member member = memberRepository.findAll().stream()
+                .filter(m -> m.getRole() == MemberRole.ADMIN
+                        || m.getRole() == MemberRole.MANAGER)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("정비 담당자가 없습니다."));
+        for (Facility facility : facilities) {
+            FacilityMaintenance maintenance = FacilityMaintenance.builder()
+                    .facility(facility)
+                    .member(member)
+                    .facilityFaultType(FacilityFaultType.OPERATION_FAILURE)
+                    .facilityStatus(FacilityStatus.AVAILABLE)
+                    .build();
+            facilityMaintenanceRepository.save(maintenance);
+        }
+        System.out.println("시설별 정비 이력 생성 완료: " + facilities.size() + "건");
+    }
+
+
+    @Test
+    void insertDummyDataQnaAnswer() {
+        List<Qna> qnas = qnaRepository.findAll();
+        int count = 0;
+        for (Qna qna : qnas) {
+            // 답변 대기 중인 질문만 처리
+            if (qna.getStatus() != QnaStatus.WAITING) {
+                continue;
+            }
+            // 답변 등록
+            qna.writeAnswer("문의하신 사항을 확인했습니다. 감사합니다.");
+            qnaRepository.save(qna);
+            count++;
+            if (count >= 5000) {
+                break;
+            }
+        }
+        System.out.println("Q&A 답변 더미데이터 " + count + "건 등록 완료");
+    }
+
+
+>>>>>>> 21aa98c2acb432291387f79521abd27fc2c47550
 }

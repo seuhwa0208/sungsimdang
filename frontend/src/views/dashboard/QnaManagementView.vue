@@ -22,7 +22,7 @@
           </td>
         </tr>
       </BaseTable>
-      <BasePagination v-model:page="list.page.value" :total-pages="list.totalPages.value" />
+      <BasePagination v-model:page="list.page.value" :total-pages="list.totalPages.value" boundary-links />
     </template>
   </div>
 </template>
