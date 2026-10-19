@@ -18,17 +18,9 @@ public class Facility {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-<<<<<<< HEAD
-//    @Column(nullable = false, unique = true, length = 100)
-//    private String facilityNo;
-
-    @Column(nullable = false, length = 100)
-    private String location;
-=======
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 100)
     private FacilityLocation location;
->>>>>>> c4ae55049f94a90180007b7ae9a0e7b118fdb392
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)

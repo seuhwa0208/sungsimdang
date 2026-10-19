@@ -1,20 +1,10 @@
 package com.sungsimdang.project.board.service;
 
 import com.sungsimdang.project.board.domain.DataFiles;
-<<<<<<< HEAD
-import com.sungsimdang.project.board.domain.Notice;
-import com.sungsimdang.project.board.dto.DataFilesResponse;
-import com.sungsimdang.project.board.dto.NoticeResponse;
-import com.sungsimdang.project.board.repository.DataFilesRepository;
-import com.sungsimdang.project.member.domain.Member;
-import com.sungsimdang.project.member.repository.MemberRepository;
-import com.sungsimdang.project.member.service.MemberService;
-=======
 import com.sungsimdang.project.board.dto.DataFilesResponse;
 import com.sungsimdang.project.board.repository.DataFilesRepository;
 import com.sungsimdang.project.member.domain.Member;
 import com.sungsimdang.project.member.repository.MemberRepository;
->>>>>>> c4ae55049f94a90180007b7ae9a0e7b118fdb392
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
