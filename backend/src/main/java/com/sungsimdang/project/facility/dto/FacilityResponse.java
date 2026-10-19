@@ -1,6 +1,10 @@
 package com.sungsimdang.project.facility.dto;
 
 import com.sungsimdang.project.facility.domain.Facility;
+<<<<<<< HEAD
+=======
+import com.sungsimdang.project.facility.domain.FacilityLocation;
+>>>>>>> c4ae55049f94a90180007b7ae9a0e7b118fdb392
 import com.sungsimdang.project.facility.domain.FacilityStatus;
 import com.sungsimdang.project.facility.domain.FacilityType;
 import lombok.Builder;
@@ -13,7 +17,11 @@ import lombok.Setter;
 public class FacilityResponse {
 
     private Long id;
+<<<<<<< HEAD
     private String location;
+=======
+    private FacilityLocation location;
+>>>>>>> c4ae55049f94a90180007b7ae9a0e7b118fdb392
     private FacilityType facilityType;
     private FacilityStatus facilityStatus;
 

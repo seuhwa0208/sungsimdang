@@ -2,7 +2,11 @@ spring:
   application:
     name: project
   datasource:
+<<<<<<< HEAD
     url: jdbc:postgresql://localhost:5432/djtcdb
+=======
+    url: jdbc:postgresql://localhost:5432/djtbc
+>>>>>>> c4ae55049f94a90180007b7ae9a0e7b118fdb392
     username: postgres
     password: 1004
     driver-class-name: org.postgresql.Driver

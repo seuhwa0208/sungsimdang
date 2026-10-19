@@ -1,5 +1,9 @@
 package com.sungsimdang.project.board.dto;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> c4ae55049f94a90180007b7ae9a0e7b118fdb392
 import com.sungsimdang.project.board.domain.DataFiles;
 import lombok.Builder;
 import lombok.Getter;

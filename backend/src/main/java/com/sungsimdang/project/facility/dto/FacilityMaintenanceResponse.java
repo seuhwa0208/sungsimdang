@@ -15,6 +15,10 @@ import java.time.LocalDateTime;
 public class FacilityMaintenanceResponse {
 
     private Long id;
+<<<<<<< HEAD
+=======
+    private Long facilityId;
+>>>>>>> c4ae55049f94a90180007b7ae9a0e7b118fdb392
     private LocalDateTime createdAt;
     private FacilityStatus facilityStatus;
     private FacilityFaultType faultType;
@@ -23,6 +27,10 @@ public class FacilityMaintenanceResponse {
     public static FacilityMaintenanceResponse from(FacilityMaintenance facilityMaintenance) {
         return FacilityMaintenanceResponse.builder()
                 .id(facilityMaintenance.getId())
+<<<<<<< HEAD
+=======
+                .facilityId(facilityMaintenance.getFacility().getId())
+>>>>>>> c4ae55049f94a90180007b7ae9a0e7b118fdb392
                 .createdAt(facilityMaintenance.getCreatedAt())
                 .facilityStatus(facilityMaintenance.getFacilityStatus())
                 .faultType(facilityMaintenance.getFacilityFaultType())

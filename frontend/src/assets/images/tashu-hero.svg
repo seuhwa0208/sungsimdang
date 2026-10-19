@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="360" viewBox="0 0 620 360" fill="none">
+  <defs>
+    <linearGradient id="frame" x1="205" y1="163" x2="390" y2="259" gradientUnits="userSpaceOnUse"><stop stop-color="#36b574"/><stop offset="1" stop-color="#168758"/></linearGradient>
+    <linearGradient id="kiosk" x1="86" y1="174" x2="86" y2="280" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset="1" stop-color="#e6f0ee"/></linearGradient>
+  </defs>
+  <circle cx="408" cy="145" r="112" fill="#dceee7"/>
+  <circle cx="480" cy="61" r="24" fill="#f5e4af"/>
+  <path d="M58 254c78-58 130-45 194-38 79 10 142-44 210-26 46 12 69 35 106 63" fill="#deecea"/>
+  <path d="M64 283c93-18 169-13 252-5 95 9 160 12 245-7" stroke="#c2d8d0" stroke-width="2"/>
+  <ellipse cx="310" cy="326" rx="256" ry="12" fill="#cbdedc" opacity=".65"/>
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <path d="M529 284v-87m0 51-19-17m19 4 18-18" stroke="#83a99a" stroke-width="4"/>
+    <path d="M502 222c-17-18-7-42 11-43-4-32 37-44 50-17 31-3 40 41 14 51 1 30-46 43-55 12" fill="#a2cdb5"/>
+    <path d="M531 210v44" stroke="#83a99a" stroke-width="4"/>
+    <path d="M87 282v-58m0 22-13-12m13 1 12-12" stroke="#83a99a" stroke-width="3"/>
+    <circle cx="87" cy="209" r="20" fill="#b6d8c4"/><circle cx="71" cy="226" r="15" fill="#b6d8c4"/><circle cx="101" cy="224" r="17" fill="#b6d8c4"/>
+  </g>
+  <g>
+    <rect x="105" y="156" width="31" height="130" rx="8" fill="url(#kiosk)" stroke="#b5c9c5" stroke-width="1.5"/>
+    <rect x="108" y="156" width="25" height="8" rx="4" fill="#20a66b"/>
+    <rect x="111" y="173" width="19" height="26" rx="3" fill="#3e5b79"/>
+    <path d="M115 181h11m-11 5h7" stroke="#c9e9df" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="121" cy="213" r="5" fill="#d9eade"/><path d="m118 213 2 2 4-4" stroke="#299a60" stroke-width="1.5"/>
+    <path d="M112 285h17" stroke="#9ab7af" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <g>
+    <circle cx="190" cy="253" r="66" fill="#f7fbfa" stroke="#40576b" stroke-width="11"/>
+    <circle cx="448" cy="253" r="66" fill="#f7fbfa" stroke="#40576b" stroke-width="11"/>
+    <g stroke="#c3d1d7" stroke-width="1.5">
+      <path d="M190 192v122m-61-61h122m-104-43 86 86m-86 0 86-86M448 192v122m-61-61h122m-104-43 86 86m-86 0 86-86"/>
+      <circle cx="190" cy="253" r="57"/><circle cx="448" cy="253" r="57"/>
+    </g>
+    <path d="M120 242a71 71 0 0 1 135-25M382 228a71 71 0 0 1 135 25" stroke="#96b9a8" stroke-width="5" stroke-linecap="round"/>
+    <path d="m190 253 79-81 33 76-112 5m79-81c27 44 64 61 98 30l17-48m-82 94 65-46" stroke="url(#frame)" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="m383 154 65 99M269 172l-7-31" stroke="#278f64" stroke-width="8" stroke-linecap="round"/>
+    <rect x="239" y="132" width="56" height="13" rx="6.5" fill="#3e5267"/>
+    <path d="m384 156-11-40 31-4" stroke="#536c7c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="m401 112 12-2" stroke="#30485c" stroke-width="10" stroke-linecap="round"/>
+    <path d="m411 119 69-8-5 40h-55Z" fill="#f5faf8" stroke="#688c86" stroke-width="3" stroke-linejoin="round"/>
+    <path d="m426 122 4 24m9-26 1 26m12-28-1 27m12-29-3 28M418 134l60-6" stroke="#bdd1c9" stroke-width="2"/>
+    <path d="M302 234h-50a14 14 0 0 0-2 28l51 2a15 15 0 0 0 1-30Z" fill="#f4f8f5" stroke="#a7c1b5" stroke-width="2"/>
+    <circle cx="302" cy="249" r="14" fill="#fff" stroke="#5c7b79" stroke-width="3"/>
+    <path d="m302 249 17 17m-3 2h14" stroke="#4c6574" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="190" cy="253" r="5" fill="#6d8d85"/><circle cx="448" cy="253" r="5" fill="#6d8d85"/>
+    <path d="m354 233-9 59" stroke="#627d79" stroke-width="4" stroke-linecap="round"/>
+    <path d="M272 178c13 20 31 32 49 36" stroke="#a8e0b9" stroke-width="2.5" stroke-linecap="round"/>
+    <text x="296" y="214" font-family="Malgun Gothic,Apple SD Gothic Neo,sans-serif" font-size="14" font-weight="800" fill="#285b47" transform="rotate(12 296 214)">타슈</text>
+    <rect x="171" y="175" width="57" height="5" rx="2.5" fill="#657e87"/><path d="m182 180-9 23m43-23 12 22" stroke="#8ba69d" stroke-width="3"/>
+    <circle cx="387" cy="142" r="4" fill="#f4cf7a"/>
+  </g>
+  <g stroke="#95b7a8" stroke-width="2" stroke-linecap="round"><path d="m62 313 3-12 4 12m8 0 2-8 4 8m458-2 3-13 4 13m9 0 2-8 4 8M319 78q6-6 12 0m0 0q6-6 12 0"/></g>
+  <path d="M40 324h31m458 0h41" stroke="#b8cfc7" stroke-width="3" stroke-linecap="round"/>
+</svg>

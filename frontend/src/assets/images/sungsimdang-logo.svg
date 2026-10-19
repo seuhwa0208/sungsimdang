@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="224" height="48" viewBox="0 0 224 48" fill="none">
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="14" cy="31" r="10" stroke="#293b72" stroke-width="3.5"/>
+    <circle cx="40" cy="31" r="10" stroke="#20a65b" stroke-width="3.5"/>
+    <path d="m14 31 10-17 8 17H14m10-17h11l5 17M21 10h8m3-1h5l3 6" stroke="#20a65b" stroke-width="3.5"/>
+    <circle cx="28" cy="31" r="3" fill="#293b72"/>
+  </g>
+  <text x="62" y="30" fill="#293b72" font-family="Malgun Gothic,Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="33" font-weight="800" letter-spacing="-1.5">성심당</text>
+  <text x="64" y="44" fill="#64778b" font-family="Segoe UI,Arial,sans-serif" font-size="8" font-weight="600" letter-spacing="1.15">SUNGSIMDANG MOBILITY</text>
+</svg>
