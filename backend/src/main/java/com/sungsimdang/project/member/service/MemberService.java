@@ -1,5 +1,6 @@
 package com.sungsimdang.project.member.service;
 
+import com.sungsimdang.project.exception.LoginFailedException;
 import com.sungsimdang.project.member.domain.Member;
 import com.sungsimdang.project.member.domain.MemberRole;
 import com.sungsimdang.project.member.domain.MemberStatus;
@@ -64,17 +65,17 @@ public class MemberService {
     @Transactional
     public Member login(String loginId, String password) {
         //회원의 존재 여부 확인
-        Member member = memberRepository.findByLoginId(loginId).orElseThrow(() -> new IllegalArgumentException("회원 정보가 확인되지 않습니다."));
+        Member member = memberRepository.findByLoginId(loginId).orElseThrow(() -> new LoginFailedException("회원 정보를 확인해 주세요."));
         //활성화되어 있는 회원인지 확인
         if(member.getStatus() != MemberStatus.ACTIVE) {
             if(member.getStatus() == MemberStatus.KICKED) {
-                throw new IllegalArgumentException("강퇴된 회원입니다.");
+                throw new LoginFailedException("강퇴된 회원입니다.");
             }
-            throw new IllegalArgumentException("비활성화된 회원입니다.");
+            throw new LoginFailedException("비활성화된 회원입니다.");
         }
         //비밀번호가 올바른지 확인
         if(!passwordEncoder.matches(password, member.getPassword())) {
-            throw new IllegalArgumentException("회원 정보를 확인해 주세요.");
+            throw new LoginFailedException("회원 정보를 확인해 주세요.");
         }
         //모두 일치하고 활성화되어 있는 회원이면, 회원 정보 리턴
         return member;

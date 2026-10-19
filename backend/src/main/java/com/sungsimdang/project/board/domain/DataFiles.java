@@ -30,9 +30,11 @@ public class DataFiles {
     private String content;
 
     @Column(nullable = false, updatable = false, name = "created_at")
+    @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "updated_at")
+    @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     @PrePersist

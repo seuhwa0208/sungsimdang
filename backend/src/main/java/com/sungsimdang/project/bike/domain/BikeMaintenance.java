@@ -34,6 +34,7 @@ public class BikeMaintenance {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private BikeStatus status = BikeStatus.AVAILABLE;
 
     @Column(nullable = false, updatable = false, name = "created_at")
