@@ -230,9 +230,9 @@ const cards = computed(() => {
   return list
 })
 
-// 상태를 눌러 바꿔도 행 위치가 달라지지 않도록 상태가 아닌 id 기준으로 정렬한다. (회원·Q&A 는 최신순)
-const bikeRows = computed(() => [...bikes.items].sort((a, b) => a.id - b.id))
-const facilityRows = computed(() => [...facilities.items].sort((a, b) => a.id - b.id))
+// 서버가 반환한 최신 등록순을 유지한다. 상태 변경으로 행 순서를 다시 정렬하지 않는다.
+const bikeRows = computed(() => bikes.items)
+const facilityRows = computed(() => facilities.items)
 const memberRows = computed(() => [...members.items].sort((a, b) => b.id - a.id))
 const qnaRows = computed(() => qna.items.filter((q) => q.status == null || q.status === 'WAITING').sort((a, b) => b.id - a.id))
 

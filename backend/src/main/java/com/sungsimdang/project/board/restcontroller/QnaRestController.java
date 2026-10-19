@@ -6,7 +6,8 @@ import com.sungsimdang.project.board.dto.QnaResponse;
 import com.sungsimdang.project.board.service.QnaService;
 import com.sungsimdang.project.config.LoginSession;
 import com.sungsimdang.project.member.domain.Member;
-import com.sungsimdang.project.member.domain.MemberRole;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,11 +50,27 @@ public class QnaRestController {
         return qnaService.findAll();
     }
 
-    //Q&A 상세 보기
+    // Q&A 상세 보기 + 조회 수 중복 증가 방지
     @GetMapping("/{qnaId}")
     @ResponseStatus(HttpStatus.OK)
-    public QnaResponse detail(@PathVariable("qnaId") Long qnaId) {
-        return qnaService.detail(qnaId);
+    public QnaResponse detail(@PathVariable("qnaId") Long qnaId,
+                              @CookieValue(value = "viewedQnas", defaultValue = "") String viewedQnas,
+                              HttpServletResponse response) {
+        String qnaKey = "_" + qnaId + "_";
+        boolean firstView = !viewedQnas.contains(qnaKey);
+        QnaResponse result;
+        if (firstView) {
+            // 최초 조회: 조회 수 증가
+            result = qnaService.increaseHits(qnaId);
+            Cookie cookie = new Cookie("viewedQnas", viewedQnas + qnaKey);
+            cookie.setMaxAge(60 * 60 * 24);
+            cookie.setPath("/");
+            response.addCookie(cookie);
+        } else {
+            // 이미 조회한 게시글: 조회 수 증가 없이 상세 조회
+            result = qnaService.detail(qnaId);
+        }
+        return result;
     }
     //마이 Q&A
     @GetMapping("/my")

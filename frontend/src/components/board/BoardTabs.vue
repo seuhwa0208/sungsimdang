@@ -1,11 +1,11 @@
 <template>
-  <nav class="mb-5 flex border-b border-gray-200" aria-label="게시판 구분">
+  <nav class="dtc-board-tabs mb-5 flex border-b border-gray-200" aria-label="게시판 구분">
     <RouterLink
       v-for="t in tabs"
       :key="t.to"
       :to="t.to"
       class="border-b-2 border-transparent px-6 py-2.5 text-sm text-gray-600 hover:text-gray-900"
-      active-class="border-brand-600! text-brand-700! font-semibold"
+      active-class="dtc-tab-active"
     >
       {{ t.label }}
     </RouterLink>

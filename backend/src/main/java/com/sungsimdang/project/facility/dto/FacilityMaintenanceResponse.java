@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class FacilityMaintenanceResponse {
 
     private Long id;
+    private Long facilityId;
     private LocalDateTime createdAt;
     private FacilityStatus facilityStatus;
     private FacilityFaultType faultType;
@@ -23,6 +24,7 @@ public class FacilityMaintenanceResponse {
     public static FacilityMaintenanceResponse from(FacilityMaintenance facilityMaintenance) {
         return FacilityMaintenanceResponse.builder()
                 .id(facilityMaintenance.getId())
+                .facilityId(facilityMaintenance.getFacility().getId())
                 .createdAt(facilityMaintenance.getCreatedAt())
                 .facilityStatus(facilityMaintenance.getFacilityStatus())
                 .faultType(facilityMaintenance.getFacilityFaultType())

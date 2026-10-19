@@ -1,5 +1,5 @@
 <template>
-  <form class="mb-4 flex flex-wrap items-end gap-2 rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200" @submit.prevent="$emit('search')">
+  <form class="dtc-search-toolbar mb-4 flex flex-wrap items-end gap-2 rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200" @submit.prevent="$emit('search')">
     <div class="min-w-48 flex-1">
       <label class="mb-1 block text-xs font-medium text-gray-500" for="list-keyword">검색</label>
       <input

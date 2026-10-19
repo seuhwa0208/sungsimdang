@@ -13,7 +13,7 @@
       :aria-invalid="!!error"
       v-bind="$attrs"
       :class="[
-        'w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:bg-gray-100',
+        'dtc-input w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:bg-gray-100',
         error ? 'border-red-400' : 'border-gray-300',
         type === 'password' && as === 'input' ? 'pr-10' : '',
       ]"

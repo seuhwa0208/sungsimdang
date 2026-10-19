@@ -1,19 +1,20 @@
 <template>
-  <div class="space-y-10">
+  <div class="dtc-home space-y-10">
     <!-- 소개 -->
-    <section class="rounded-xl bg-white px-8 py-12 shadow-sm ring-1 ring-gray-200 sm:px-12">
+    <section class="dtc-hero rounded-xl bg-white px-8 py-12 shadow-sm ring-1 ring-gray-200 sm:px-12">
       <h1 class="text-2xl font-bold leading-snug text-gray-900 sm:text-3xl">
-        시민과 함께하는<br />편리한 대중교통 서비스,<br />대전교통공사가 만들어갑니다
+        시민과 함께하는<br /><span>편리한 타슈 모빌리티,</span><br />성심당이 만들어갑니다
       </h1>
-      <p class="mt-4 max-w-xl text-sm text-gray-600 sm:text-base">타슈, 교통 인프라 등 대전의 대중교통 정보를 통합적으로 제공하는 대전교통공사 통합운영관리시스템입니다.</p>
+      <p class="mt-4 max-w-xl text-sm text-gray-600 sm:text-base">타슈와 교통 기반시설의 정보를 한곳에서 만나는 성심당 통합운영관리시스템입니다.</p>
+      <img class="dtc-hero-art" src="../../assets/images/tashu-hero.svg" alt="" aria-hidden="true" width="620" height="360" />
     </section>
 
     <!-- 타슈 / 기반시설 현황 요약: 목록 API 응답으로 집계 가능한 값만 표시 -->
-    <section class="grid gap-6 lg:grid-cols-2">
-      <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
+    <section class="dtc-service-grid grid gap-6 lg:grid-cols-2">
+      <div class="dtc-service-card rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
         <div class="flex items-center justify-between"><h2 class="text-lg font-bold">타슈 운영 현황</h2><RouterLink to="/bikes" class="text-sm text-brand-600 hover:underline">더보기 〉</RouterLink></div>
         <div class="mt-5 grid gap-3 sm:grid-cols-3">
-          <div v-for="s in bikeStats" :key="s.key" class="rounded-xl bg-sky-100 px-4 py-3">
+          <div v-for="s in bikeStats" :key="s.key" class="dtc-stat rounded-xl bg-sky-100 px-4 py-3">
             <p class="text-sm text-gray-800">{{ s.label }}</p>
             <div class="mt-1 flex items-center justify-between gap-2">
               <p class="text-xl font-bold tabular-nums text-gray-900">{{ bikes.loading.value ? '조회 중' : bikes.error.value ? '조회 불가' : s.count.toLocaleString('ko-KR') + '대' }}</p>
@@ -59,10 +60,10 @@
         </div>
       </div>
 
-      <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
+      <div class="dtc-service-card rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
         <div class="flex items-center justify-between"><h2 class="text-lg font-bold">기반시설 현황</h2><RouterLink to="/facilities" class="text-sm text-brand-600 hover:underline">더보기 〉</RouterLink></div>
         <div class="mt-5 grid gap-3 sm:grid-cols-3">
-          <div v-for="s in facilityStats" :key="s.key" class="rounded-xl bg-sky-100 px-4 py-3">
+          <div v-for="s in facilityStats" :key="s.key" class="dtc-stat rounded-xl bg-sky-100 px-4 py-3">
             <p class="text-sm text-gray-800">{{ s.label }}</p>
             <div class="mt-1 flex items-center justify-between gap-2">
               <p class="text-xl font-bold tabular-nums text-gray-900">{{ facilities.loading.value ? '조회 중' : facilities.error.value ? '조회 불가' : s.count.toLocaleString('ko-KR') + '개' }}</p>
@@ -77,7 +78,7 @@
     </section>
 
     <!-- 최근 공지사항 / Q&A -->
-    <section class="grid gap-6 lg:grid-cols-2">
+    <section class="dtc-news-grid grid gap-6 lg:grid-cols-2">
       <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
         <div class="flex items-center justify-between"><h2 class="text-lg font-bold">최근 공지사항</h2><RouterLink to="/notices" class="text-sm text-brand-600 hover:underline">더보기 〉</RouterLink></div>
         <LoadingState v-if="notices.loading.value" />

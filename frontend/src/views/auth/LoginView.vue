@@ -1,5 +1,6 @@
 <template>
-  <div class="mx-auto max-w-md rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-200">
+  <div class="dtc-auth dtc-auth-login mx-auto max-w-md rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-200">
+    <div class="dtc-auth-emblem" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="11" r="5" /><path d="M6 28v-3a10 10 0 0 1 20 0v3M11 28h10" /></svg></div>
     <h1 class="text-center text-2xl font-bold">로그인</h1>
     <p class="mb-6 mt-2 text-center text-sm text-gray-500">대전교통공사 통합운영관리시스템에 오신 것을 환영합니다.</p>
 

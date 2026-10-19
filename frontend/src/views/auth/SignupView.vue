@@ -1,5 +1,6 @@
 <template>
-  <div class="mx-auto max-w-lg rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-200">
+  <div class="dtc-auth dtc-auth-signup mx-auto max-w-lg rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-200">
+    <div class="dtc-auth-emblem" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><circle cx="13" cy="10" r="5" /><path d="M3 27v-3a10 10 0 0 1 16-8M25 17v12M19 23h12" /></svg></div>
     <h1 class="text-center text-2xl font-bold">회원가입</h1>
     <p class="mb-6 mt-2 text-center text-sm text-gray-600">회원 정보를 입력해 주세요.</p>
 

@@ -1,6 +1,7 @@
 package com.sungsimdang.project.bike.dto;
 
 import com.sungsimdang.project.bike.domain.Bike;
+import com.sungsimdang.project.bike.domain.BikeLocation;
 import com.sungsimdang.project.bike.domain.BikeStatus;
 import com.sungsimdang.project.member.domain.Member;
 import com.sungsimdang.project.member.dto.MemberResponse;
@@ -14,7 +15,7 @@ import lombok.Setter;
 public class BikeResponse {
 
     private Long id;
-    private String location;
+    private BikeLocation location;
     private BikeStatus status;
     private float distance;
 

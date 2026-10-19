@@ -1,5 +1,5 @@
 <template>
-  <nav class="mb-6 w-full shrink-0 md:mb-0 md:w-52" aria-label="마이페이지 메뉴">
+  <nav class="dtc-mypage-nav mb-6 w-full shrink-0 md:mb-0 md:w-52" aria-label="마이페이지 메뉴">
     <ul class="flex gap-1 overflow-x-auto md:flex-col">
       <li v-for="t in tabs" :key="t.to">
         <RouterLink

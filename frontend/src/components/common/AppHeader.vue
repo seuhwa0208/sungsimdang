@@ -1,27 +1,31 @@
 <template>
-  <header class="bg-gray-800 text-white">
-    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-      <RouterLink to="/" class="text-base font-bold tracking-tight sm:text-lg" @click="open = false">대전교통공사 통합운영관리</RouterLink>
+  <header class="dtc-header">
+    <div class="dtc-utility" aria-hidden="true"><div class="dtc-header-inner"><span>성심당 통합운영관리시스템</span><span class="dtc-utility-accent"><i /> 시민과 함께하는 편리한 대중교통</span></div></div>
+    <div class="dtc-header-inner dtc-header-main">
+      <RouterLink to="/" class="dtc-brand" @click="open = false">
+        <img src="../../assets/images/sungsimdang-logo.svg" alt="성심당" width="224" height="48" />
+        <span class="dtc-brand-divider" aria-hidden="true" /><span class="dtc-brand-caption">통합운영관리</span>
+      </RouterLink>
 
-      <button type="button" class="rounded p-2 hover:bg-gray-700 md:hidden" :aria-expanded="open" aria-label="메뉴 열기" @click="open = !open">
-        <span class="block h-0.5 w-5 bg-white" /><span class="mt-1 block h-0.5 w-5 bg-white" /><span class="mt-1 block h-0.5 w-5 bg-white" />
+      <button type="button" class="dtc-menu-toggle" :aria-expanded="open" aria-label="메뉴 열기" @click="open = !open">
+        <span /><span /><span />
       </button>
 
-      <nav :class="[open ? 'flex' : 'hidden', 'absolute inset-x-0 top-[52px] z-30 flex-col gap-1 bg-gray-800 px-4 pb-4 md:static md:flex md:flex-row md:items-center md:gap-1 md:p-0']">
-        <RouterLink v-for="m in menus" :key="m.to" :to="m.to" :class="linkClass" active-class="bg-gray-700! font-semibold" @click="open = false">{{ m.label }}</RouterLink>
-        <RouterLink v-if="auth.canManageOps" to="/dashboard" :class="linkClass" active-class="bg-gray-700! font-semibold" @click="open = false">대시보드</RouterLink>
+      <nav :class="['dtc-navigation', { 'is-open': open }]">
+        <RouterLink v-for="m in menus" :key="m.to" :to="m.to" :class="[linkClass, 'dtc-menu-link']" active-class="is-active" @click="open = false">{{ m.label }}</RouterLink>
+        <RouterLink v-if="auth.canManageOps" to="/dashboard" :class="[linkClass, 'dtc-menu-link']" active-class="is-active" @click="open = false">대시보드</RouterLink>
 
-        <span class="mx-2 hidden h-5 w-px bg-gray-600 md:block" />
+        <span class="dtc-nav-divider" aria-hidden="true" />
 
         <template v-if="auth.isAuthenticated">
-          <RouterLink to="/mypage" :class="linkClass" @click="open = false">
-            {{ auth.currentUser.name }}<span class="ml-1 text-xs text-gray-400">({{ roleLabel }})</span>
+          <RouterLink to="/mypage" :class="[linkClass, 'dtc-account-link']" @click="open = false">
+            {{ auth.currentUser.name }}<span class="dtc-role-label">({{ roleLabel }})</span>
           </RouterLink>
-          <button type="button" :class="linkClass" @click="onLogout">로그아웃</button>
+          <button type="button" :class="[linkClass, 'dtc-account-link', 'dtc-account-action']" @click="onLogout">로그아웃</button>
         </template>
         <template v-else>
-          <RouterLink to="/login" :class="linkClass" @click="open = false">로그인</RouterLink>
-          <RouterLink to="/signup" :class="linkClass" @click="open = false">회원가입</RouterLink>
+          <RouterLink to="/login" :class="[linkClass, 'dtc-account-link']" @click="open = false">로그인</RouterLink>
+          <RouterLink to="/signup" :class="[linkClass, 'dtc-account-link', 'dtc-account-action']" @click="open = false">회원가입</RouterLink>
         </template>
       </nav>
     </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-5 flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+  <div class="dtc-manage-toolbar mb-5 flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
     <div class="flex flex-wrap items-end gap-x-6 gap-y-3">
       <h1 class="flex items-center gap-2 pb-1 text-2xl font-bold text-gray-900"><slot name="icon" />{{ title }}</h1>
 

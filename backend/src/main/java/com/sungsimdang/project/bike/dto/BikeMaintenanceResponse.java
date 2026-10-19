@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class BikeMaintenanceResponse {
 
     private Long id;
+    private Long bikeId;
     private LocalDateTime createdAt;
     private BikeStatus status;
     private BikeFaultType faultType;
@@ -24,6 +25,7 @@ public class BikeMaintenanceResponse {
     public static BikeMaintenanceResponse from(BikeMaintenance bikeMaintenance) {
         return BikeMaintenanceResponse.builder()
                 .id(bikeMaintenance.getId())
+                .bikeId(bikeMaintenance.getBike().getId())
                 .createdAt(bikeMaintenance.getCreatedAt())
                 .status(bikeMaintenance.getStatus())
                 .faultType(bikeMaintenance.getBikeFaultType())

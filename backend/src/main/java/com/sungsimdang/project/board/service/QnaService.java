@@ -114,4 +114,12 @@ public class QnaService {
         }
         return value.trim();
     }
+
+    //조회 수 증가
+    @Transactional
+    public QnaResponse increaseHits(Long id) {
+        Qna qna = findById(id);
+        qna.setHits(qna.getHits() + 1);
+        return QnaResponse.from(qna);
+    }
 }

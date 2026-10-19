@@ -46,10 +46,9 @@ const isPassword = (v) => typeof v === 'string' && v.length >= 4 && v.length <= 
 const newestFirst = (list) => [...list].sort((a, b) => b.id - a.id)
 const keywordOf = (query) => String(query.keyword ?? query.q ?? query.title ?? query.location ?? '').trim().toLowerCase()
 
-// 두 정비 이벤트의 처리 결과 → 처리 직전 상태. 실제 Response DTO와 같은 계약이다.
-const stateBeforeMaintenance = result => result === 'REPAIRING' ? 'UNAVAILABLE' : result === 'AVAILABLE' ? 'REPAIRING' : result
-const bikeMtDto = (r) => ({ id: r.id, bikeId: r.bikeId, createdAt: r.createdAt, status: stateBeforeMaintenance(r.status), faultType: r.faultType, memberLoginId: r.memberLoginId })
-const facilityMtDto = (r) => ({ id: r.id, facilityId: r.facilityId, createdAt: r.createdAt, facilityStatus: stateBeforeMaintenance(r.facilityStatus), faultType: r.faultType, memberLoginId: r.memberLoginId })
+// 실제 DTO와 동일하게 기록에 저장된 당시 상태를 반환한다. 접수는 REPAIRING, 완료는 AVAILABLE.
+const bikeMtDto = (r) => ({ id: r.id, bikeId: r.bikeId, createdAt: r.createdAt, status: r.status, faultType: r.faultType, memberLoginId: r.memberLoginId })
+const facilityMtDto = (r) => ({ id: r.id, facilityId: r.facilityId, createdAt: r.createdAt, facilityStatus: r.facilityStatus, faultType: r.faultType, memberLoginId: r.memberLoginId })
 const qnaDto = ({ memberId, ...q }) => q
 
 // 게시판(공지/자료실) 공통 CRUD + 검색

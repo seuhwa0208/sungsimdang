@@ -44,6 +44,8 @@ public class SpringSecurity {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // SPA: XSRF-TOKEN 쿠키 발급 및 X-XSRF-TOKEN 헤더 검증
+                .csrf(csrf -> csrf.spa())
                 //인가 방법
                 .authorizeHttpRequests(auth -> auth
                         //모든 사용자에 대한 접근 => permitAll()
@@ -72,7 +74,11 @@ public class SpringSecurity {
                 )
                 //예외 페이지(403 페이지)
                 .exceptionHandling(ex -> ex
-                        .accessDeniedPage("/error/403"));
+                        .accessDeniedHandler((request, response, exception) -> {
+                            response.setStatus(403);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"message\":\"요청이 거부되었습니다. 새로고침 후 다시 시도해 주세요.\"}");
+                        }));
         return http.build();
     }
 
