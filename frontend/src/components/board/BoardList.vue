@@ -31,7 +31,7 @@
           <td v-if="showHits" class="hidden px-4 py-3 text-gray-500 sm:table-cell">{{ row.hits ?? '-' }}</td>
         </tr>
       </BaseTable>
-      <BasePagination v-model:page="list.page.value" :total-pages="list.totalPages.value" />
+      <BasePagination v-model:page="list.page.value" :total-pages="list.totalPages.value" boundary-links />
     </template>
   </div>
 </template>
