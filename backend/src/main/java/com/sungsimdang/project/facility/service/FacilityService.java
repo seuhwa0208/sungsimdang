@@ -37,11 +37,6 @@ public class FacilityService {
         return facilityRepository.findById(id).orElseThrow(()-> new IllegalArgumentException("시설을 찾을 수 없습니다."));
     }
 
-//    //검색
-//    public List<FacilityResponse> findByKeyword (String facilityNo) {
-//        return facilityRepository.findByFacilityNoContainingOrderByCreatedAtDesc(facilityNo).stream().map(FacilityResponse::from).toList();
-//    }
-
     //위치 검색으로 시설 목록 불러오기
     public List<FacilityResponse> findByLocationList (FacilityLocation location){
         return facilityRepository.findByLocationOrderByCreatedAtDesc(location).stream().map(FacilityResponse::from).toList();

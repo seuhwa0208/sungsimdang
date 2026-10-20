@@ -12,7 +12,6 @@
       <form class="flex flex-wrap items-end gap-3" @submit.prevent="search">
         <div class="w-full sm:max-w-sm"><BaseSelect v-model="location" :options="LOCATION_OPTIONS" placeholder="전체 역" label="위치" /></div>
         <BaseButton type="submit">검색</BaseButton>
-        <BaseButton variant="secondary" @click="list.reset(resetFilters)">초기화</BaseButton>
       </form>
     </section>
 
@@ -77,13 +76,14 @@ import { formatBikeId, formatDistance } from '../../utils/format'
 const location = ref('')
 const appliedLocation = ref('')
 const selectedId = ref(null)
-const resetFilters = () => { location.value = ''; appliedLocation.value = '' }
 function search() { appliedLocation.value = location.value; list.search() }
-const list = useListView(() => bikeService.memberList(), {
+// 위치를 선택해 검색하면 GET /api/bike/member/search?location=..., 아니면 GET /api/bike/member/
+const list = useListView(() => (appliedLocation.value ? bikeService.memberSearch({ location: appliedLocation.value }) : bikeService.memberList()), {
   pageSize: 5,
-  predicate: bike => bike.status === 'AVAILABLE' && (!appliedLocation.value || bike.location === appliedLocation.value),
+  predicate: bike => bike.status === 'AVAILABLE',
   watchSources: [appliedLocation],
 })
+watch(appliedLocation, () => list.load())
 watch(list.pageItems, rows => {
   if (!rows.some(bike => bike.id === selectedId.value)) selectedId.value = rows[0]?.id ?? null
 }, { immediate: true })

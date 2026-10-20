@@ -30,7 +30,7 @@ try {
   for (const [svc, base, statusKey] of [[bike, '/bike', 'status'], [facility, '/facilities', 'facilityStatus']]) {
     const key = base === '/bike' ? 'bike' : 'facility'
     await request(`${key} public list`, () => svc.memberList(), 'get', `${base}/member${key === 'bike' ? '/' : ''}`)
-    await request(`${key} public detail`, () => svc.memberGet(3), 'get', `${base}/member/3`)
+    if (key === 'bike') await request(`${key} public detail`, () => svc.memberGet(3), 'get', `${base}/member/3`)
     await request(`${key} location search`, () => svc.memberSearch({ location: 'DAEJEON' }), 'get', `${base}/member/search`)
     assert.equal(captured.params.location, 'DAEJEON')
     await request(`${key} admin list`, () => svc.list(), 'get', base)

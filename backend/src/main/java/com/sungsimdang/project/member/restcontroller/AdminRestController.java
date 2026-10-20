@@ -37,16 +37,7 @@ public class AdminRestController {
         return memberService.findAll();
     }
 
-    //회원 상세
-    //id로 회원 조회
-    @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public MemberResponse findById(@PathVariable("id") Long id, HttpSession session) {
-        if (!isAdmin(session)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한이 필요합니다.");
-        }
-        return memberService.findById(id);
-    }
+
     //loginId로 조회
     @GetMapping("/login-id/{loginId}")
     @ResponseStatus(HttpStatus.OK)
@@ -57,15 +48,6 @@ public class AdminRestController {
         return memberService.findByLoginId(loginId);
     }
 
-    //회원 정보 수정
-    @PutMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public MemberResponse update(@PathVariable("id")Long id,@Valid @RequestBody MemberUpdateRequest request, HttpSession session) {
-        if (!isAdmin(session)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자 권한이 필요합니다.");
-        }
-        return memberService.update(id, request);
-    }
     //회원 활성화
     @PatchMapping("/{id}/activate")
     @ResponseStatus(HttpStatus.OK)

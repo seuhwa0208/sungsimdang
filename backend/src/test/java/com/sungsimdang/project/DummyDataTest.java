@@ -110,11 +110,35 @@ public class DummyDataTest {
         facilityMaintenanceRepository.deleteAll();
         facilityRepository.deleteAll();
         List<Facility> facilities = facilityRepository.findAllByOrderByCreatedAtDesc();
-        for (int i = 1; i <= 10000; i++) {
+        for (int i = 1; i <= 2500; i++) {
 
             Facility facility = Facility.builder()
                     .location(FacilityLocation.CITY_HALL)
                     .facilityType(FacilityType.ELEVATOR)
+                    .build();
+            facilityRepository.save(facility);
+        }
+        for (int i = 1; i <= 2500; i++) {
+
+            Facility facility = Facility.builder()
+                    .location(FacilityLocation.CITY_HALL)
+                    .facilityType(FacilityType.BIKE_STATION)
+                    .build();
+            facilityRepository.save(facility);
+        }
+        for (int i = 1; i <= 2500; i++) {
+
+            Facility facility = Facility.builder()
+                    .location(FacilityLocation.CITY_HALL)
+                    .facilityType(FacilityType.SCREEN_DOOR)
+                    .build();
+            facilityRepository.save(facility);
+        }
+        for (int i = 1; i <= 2500; i++) {
+
+            Facility facility = Facility.builder()
+                    .location(FacilityLocation.CITY_HALL)
+                    .facilityType(FacilityType.BIKE_RACK)
                     .build();
             facilityRepository.save(facility);
         }
@@ -153,9 +177,6 @@ public class DummyDataTest {
         }
         System.out.println("더미 멤버 10000건 추가 완료");
     }
-
-<<<<<<< HEAD
-=======
     @Test
     void insertDummyDataBikeMaintenance() {
         List<Bike> bikes = bikeRepository.findAll();
@@ -215,7 +236,4 @@ public class DummyDataTest {
         }
         System.out.println("Q&A 답변 더미데이터 " + count + "건 등록 완료");
     }
-
-
->>>>>>> 21aa98c2acb432291387f79521abd27fc2c47550
 }

@@ -6,9 +6,8 @@
     </div>
 
     <form class="flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-white p-5" @submit.prevent="search">
-      <div class="w-full sm:w-44"><BaseSelect v-model="type" :options="typeOptions" placeholder="전체 유형" label="시설 유형" /></div>
       <div class="min-w-0 flex-1 sm:max-w-sm"><BaseSelect v-model="location" :options="LOCATION_OPTIONS" placeholder="전체 역" label="위치" /></div>
-      <BaseButton type="submit">검색</BaseButton><BaseButton variant="secondary" @click="list.reset(resetFilters)">초기화</BaseButton>
+      <BaseButton type="submit">검색</BaseButton>
     </form>
 
     <LoadingState v-if="list.loading.value" />
@@ -17,7 +16,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 px-5 py-5">
         <h2 class="font-bold text-gray-900">시설 목록</h2>
       </div>
-      <EmptyState v-if="!list.pageItems.value.length" :title="appliedLocation || type ? '선택한 조건에 이용가능한 시설이 없습니다.' : '이용가능한 시설이 없습니다.'" />
+      <EmptyState v-if="!list.pageItems.value.length" :title="appliedLocation ? '선택한 조건에 이용가능한 시설이 없습니다.' : '이용가능한 시설이 없습니다.'" />
       <template v-else>
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
@@ -39,7 +38,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import BaseButton from '../../components/common/BaseButton.vue'
 import BaseSelect from '../../components/common/BaseSelect.vue'
 import BasePagination from '../../components/common/BasePagination.vue'
@@ -49,17 +48,16 @@ import EmptyState from '../../components/common/EmptyState.vue'
 import { useListView } from '../../composables/useListView'
 import { facilityService } from '../../services/facilityService'
 import { LOCATION_OPTIONS, locationLabel } from '../../constants/locations'
-import { facilityTypeLabels, labelOf, toOptions } from '../../utils/statusLabels'
+import { facilityTypeLabels, labelOf } from '../../utils/statusLabels'
 import { facilityName } from '../../utils/format'
 
-const type = ref('')
 const location = ref('')
 const appliedLocation = ref('')
-const typeOptions = toOptions(facilityTypeLabels)
-const resetFilters = () => { type.value = ''; location.value = ''; appliedLocation.value = '' }
 function search() { appliedLocation.value = location.value; list.search() }
-const list = useListView(() => facilityService.memberList(), {
-  predicate: facility => facility.facilityStatus === 'AVAILABLE' && (!type.value || facility.facilityType === type.value) && (!appliedLocation.value || facility.location === appliedLocation.value),
-  watchSources: [type, appliedLocation],
+// 위치를 선택해 검색하면 GET /api/facilities/member/search?location=..., 아니면 GET /api/facilities/member
+const list = useListView(() => (appliedLocation.value ? facilityService.memberSearch({ location: appliedLocation.value }) : facilityService.memberList()), {
+  predicate: facility => facility.facilityStatus === 'AVAILABLE',
+  watchSources: [appliedLocation],
 })
+watch(appliedLocation, () => list.load())
 </script>

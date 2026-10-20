@@ -29,7 +29,7 @@
         <p v-if="bikes.loading" class="py-6 text-center text-sm text-gray-500">불러오는 중입니다.</p>
         <p v-else-if="bikes.failed" class="py-6 text-center text-sm text-gray-500">조회하지 못했습니다.</p>
         <template v-else>
-          <PanelSearch v-model="bikeList.keyword.value" v-model:status="bikeList.status.value" :status-options="operationStatusOptions" label="자전거 번호" placeholder="자전거 번호 입력" @search="bikeList.search" />
+          <PanelSearch v-model="bikeList.keyword.value" status-button numeric :status-active="bikeByStatus" label="자전거 번호" placeholder="자전거 번호 입력" @search="bikeList.search" @status-click="toggleBikeStatus" />
           <EmptyState v-if="!bikeList.filtered.value.length" :title="bikeList.applied.value ? '검색 결과가 없습니다.' : '등록된 자전거가 없습니다.'" />
           <template v-else>
             <BaseTable>
@@ -58,7 +58,7 @@
         <p v-if="facilities.loading" class="py-6 text-center text-sm text-gray-500">불러오는 중입니다.</p>
         <p v-else-if="facilities.failed" class="py-6 text-center text-sm text-gray-500">조회하지 못했습니다.</p>
         <template v-else>
-          <PanelSearch v-model="facilityList.keyword.value" v-model:status="facilityList.status.value" :status-options="facilityStatusOptions" label="시설 번호" placeholder="시설 검색" @search="facilityList.search" />
+          <PanelSearch v-model="facilityList.keyword.value" status-button numeric :status-active="facilityByStatus" label="시설 번호" placeholder="시설 번호 입력" @search="facilityList.search" @status-click="toggleFacilityStatus" />
           <EmptyState v-if="!facilityList.filtered.value.length" :title="facilityList.applied.value ? '검색 결과가 없습니다.' : '등록된 시설이 없습니다.'" />
           <template v-else>
             <BaseTable>
@@ -71,7 +71,7 @@
                 <td class="whitespace-nowrap px-3 py-2">
                   <div class="flex justify-end gap-1.5">
                     <BaseButton size="xs" variant="secondary" @click="openFacilityForm(f)">정보 수정</BaseButton>
-                    <BaseButton size="xs" variant="secondary" @click="$router.push(`/dashboard/facilities/${f.id}/maintenance`)">점검 등록</BaseButton>
+                    <BaseButton size="xs" variant="secondary" @click="$router.push(`/dashboard/facilities/${f.id}/maintenance`)">고장 접수</BaseButton>
                   </div>
                 </td>
               </tr>
@@ -87,7 +87,7 @@
         <p v-if="members.loading" class="py-6 text-center text-sm text-gray-500">불러오는 중입니다.</p>
         <p v-else-if="members.failed" class="py-6 text-center text-sm text-gray-500">조회하지 못했습니다.</p>
         <template v-else>
-          <PanelSearch v-model="memberList.keyword.value" v-model:status="memberList.status.value" :status-options="memberStatusOptions" label="아이디" placeholder="아이디 검색" @search="memberList.search" />
+          <PanelSearch v-model="memberList.keyword.value" v-model:status="memberList.status.value" :status-options="memberStatusOptions" label="아이디" placeholder="아이디 검색" @search="searchMember" />
           <EmptyState v-if="!memberList.filtered.value.length" :title="memberList.applied.value ? '검색 결과가 없습니다.' : '회원이 없습니다.'" />
           <template v-else>
             <BaseTable>
@@ -131,7 +131,7 @@
 
     <BikeFormModal v-model="bikeForm.open" :bike="bikeForm.target" @saved="onSaved($event, loadBikes)" />
     <FacilityFormModal v-model="facilityForm.open" :facility="facilityForm.target" @saved="onSaved($event, loadFacilities)" />
-    <MemberRoleModal v-model="roleForm.open" :member="roleForm.target" @saved="onSaved($event, loadMembers)" />
+    <MemberRoleModal v-model="roleForm.open" :member="roleForm.target" @saved="onSaved($event, reloadMembers)" />
 
 
   </div>
@@ -184,8 +184,9 @@ const bikes = makeState()
 const facilities = makeState()
 const members = makeState()
 const qna = makeState()
-const operationStatusOptions = toOptions(bikeStatusLabels)
-const facilityStatusOptions = toOptions(facilityStatusLabels)
+// 상태 버튼: 켜면 상태별 정렬 API(GET /api/bike/status, GET /api/facilities/status), 끄면 기본 목록 API를 호출한다.
+const bikeByStatus = ref(false)
+const facilityByStatus = ref(false)
 
 // 한 목록이 실패해도 나머지는 표시한다.
 async function fill(state, fetcher) {
@@ -202,8 +203,8 @@ async function fill(state, fetcher) {
   }
 }
 // 등록·수정 후 다시 불러올 수 있도록 함수로 둔다.
-const loadBikes = () => fill(bikes, () => bikeService.list())
-const loadFacilities = () => fill(facilities, () => facilityService.list())
+const loadBikes = () => fill(bikes, () => (bikeByStatus.value ? bikeService.listByStatus() : bikeService.list()))
+const loadFacilities = () => fill(facilities, () => (facilityByStatus.value ? facilityService.listByStatus() : facilityService.list()))
 const loadMembers = () => fill(members, () => adminMemberService.list())
 loadBikes()
 loadFacilities()
@@ -233,14 +234,63 @@ const cards = computed(() => {
 // 서버가 반환한 최신 등록순을 유지한다. 상태 변경으로 행 순서를 다시 정렬하지 않는다.
 const bikeRows = computed(() => bikes.items)
 const facilityRows = computed(() => facilities.items)
-const memberRows = computed(() => [...members.items].sort((a, b) => b.id - a.id))
+// 아이디 검색 결과(GET /api/admin/login-id/{loginId}). null 이면 검색하지 않은 상태(전체 목록), 배열이면 검색 결과(0~1명)
+const memberFound = ref(null)
+const memberRows = computed(() => [...(memberFound.value ?? members.items)].sort((a, b) => b.id - a.id))
 const qnaRows = computed(() => qna.items.filter((q) => q.status == null || q.status === 'WAITING').sort((a, b) => b.id - a.id))
 
 // 와이어프레임의 패널별 검색(자전거 번호 / 시설 / 회원 / 게시글) + 3건씩 페이징
-const bikeList = usePanelList(bikeRows, (b) => [b.id, formatBikeId(b.id), b.location, locationLabel(b.location)], PAGE_SIZE, (b) => b.status)
-const facilityList = usePanelList(facilityRows, (f) => [f.id, formatFacilityId(f.id), f.location, locationLabel(f.location), labelOf(facilityTypeLabels, f.facilityType)], PAGE_SIZE, (f) => f.facilityStatus)
+const bikeList = usePanelList(bikeRows, (b) => [b.id], PAGE_SIZE)
+const facilityList = usePanelList(facilityRows, (f) => [f.id], PAGE_SIZE)
 const memberList = usePanelList(memberRows, (m) => [m.id, m.loginId, m.name, m.email], PAGE_SIZE, (m) => m.status)
 const qnaList = usePanelList(qnaRows, (q) => [q.id, q.title], PAGE_SIZE)
+
+// 회원 패널 검색: 아이디가 정확히 일치하는 회원 1명을 서버에서 조회한다. 검색어를 비우고 검색하면 전체 목록으로 돌아간다.
+// 없는 아이디는 백엔드가 IllegalArgumentException(현재 500)으로 응답하므로 400/404/500 은 "검색 결과 없음"으로 처리한다.
+async function fetchMemberByLoginId(loginId) {
+  try {
+    return [await adminMemberService.getByLoginId(loginId)]
+  } catch (e) {
+    if ([400, 404, 500].includes(parseError(e).status)) return []
+    throw e
+  }
+}
+async function searchMember() {
+  const loginId = memberList.keyword.value.trim()
+  memberList.search()
+  if (!loginId) {
+    memberFound.value = null
+    return
+  }
+  try {
+    memberFound.value = await fetchMemberByLoginId(loginId)
+  } catch (e) {
+    statusError.value = `회원을 검색하지 못했습니다. ${parseError(e).message}`
+    setTimeout(() => (statusError.value = ''), 4000)
+  }
+}
+// 권한 변경 등으로 목록을 다시 불러올 때, 검색 결과도 최신으로 갱신한다.
+async function reloadMembers() {
+  await loadMembers()
+  if (!memberFound.value) return
+  try {
+    memberFound.value = await fetchMemberByLoginId(memberList.applied.value)
+  } catch {
+    // 갱신에 실패하면 이전 검색 결과를 유지한다.
+  }
+}
+
+// "상태" 버튼을 누르면 해당 패널의 목록을 상태별 정렬 API로 다시 조회한다. (한 번 더 누르면 기본 목록으로 복귀)
+function toggleBikeStatus() {
+  bikeByStatus.value = !bikeByStatus.value
+  bikeList.page.value = 1
+  loadBikes()
+}
+function toggleFacilityStatus() {
+  facilityByStatus.value = !facilityByStatus.value
+  facilityList.page.value = 1
+  loadFacilities()
+}
 
 // 등록·수정·권한 변경 팝업. 저장에 성공하면 해당 목록만 다시 불러온다.
 const memberStatusOptions = toOptions(memberStatusLabels).filter((o) => o.value !== 'KICKED') // 상태 검색 목록에서 강퇴 제외
@@ -287,6 +337,11 @@ async function changeStatus(kind, item, next) {
     // 서버가 성공을 응답한 뒤에만 화면 값을 바꾼다. (실패하면 이전 상태 그대로)
     if (isBike || isMember) item.status = next
     else item.facilityStatus = next
+    if (isMember) {
+      // 검색 결과로 보이는 회원은 전체 목록의 행과 다른 객체일 수 있어 같이 맞춘다.
+      const row = members.items.find((m) => m.id === item.id)
+      if (row) row.status = next
+    }
     const name = isMember ? `회원 ${item.loginId}` : isBike ? `자전거 ${formatBikeId(item.id)}` : `시설 ${formatFacilityId(item.id)}`
     const labels = isMember ? memberStatusLabels : isBike ? bikeStatusLabels : facilityStatusLabels
     flash(`${name} 상태를 '${labelOf(labels, next)}'(으)로 변경했습니다.`)

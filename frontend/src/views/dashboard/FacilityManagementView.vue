@@ -33,7 +33,7 @@
           <td class="px-4 py-3">
             <div class="flex justify-center gap-1.5">
               <BaseButton size="sm" variant="secondary" @click="openEdit(f)">정보 수정</BaseButton>
-              <BaseButton size="sm" variant="secondary" @click="$router.push(`/dashboard/facilities/${f.id}/maintenance`)">점검 등록</BaseButton>
+              <BaseButton size="sm" variant="secondary" @click="$router.push(`/dashboard/facilities/${f.id}/maintenance`)">고장 접수</BaseButton>
             </div>
           </td>
         </tr>

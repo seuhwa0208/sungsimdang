@@ -166,15 +166,6 @@ const routes = [
     const m = db.members.find((x) => x.loginId === decodeURIComponent(p[0])) || fail(404, '대상을 찾을 수 없습니다.')
     return memberDto(m)
   }],
-  ['get', /^\/admin\/(\d+)$/, ({ p }) => (requireRole('ADMIN'), memberDto(byId(db.members, p[0])))],
-  ['put', /^\/admin\/(\d+)$/, ({ p, body }) => {
-    requireRole('ADMIN')
-    const m = byId(db.members, p[0])
-    need(body.name?.trim(), '이름은 필수입니다.', 'name')
-    need(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email || ''), '올바른 이메일 형식이 아닙니다.', 'email')
-    Object.assign(m, { name: body.name, email: body.email, tel: body.tel ?? m.tel })
-    return memberDto(m)
-  }],
   ['patch', /^\/admin\/(\d+)\/role$/, ({ p, body }) => {
     requireRole('ADMIN')
     need(['USER', 'MANAGER', 'ADMIN'].includes(body.role), '올바르지 않은 권한입니다.')
@@ -255,14 +246,8 @@ const routes = [
     const kw = keywordOf(query)
     return newestFirst(db.facilities).filter((f) => !kw || f.location.toLowerCase().includes(kw))
   }],
-  ['get', /^\/facilities\/member\/(\d+)$/, ({ p }) => byId(db.facilities, p[0])],
   ['get', /^\/facilities$/, () => (requireRole('MANAGER', 'ADMIN'), newestFirst(db.facilities))],
   ['get', /^\/facilities\/status$/, () => (requireRole('MANAGER', 'ADMIN'), [...db.facilities].sort((a, b) => statusRank[a.facilityStatus] - statusRank[b.facilityStatus] || b.id - a.id))],
-  ['get', /^\/facilities\/search$/, ({ query }) => {
-    requireRole('MANAGER', 'ADMIN')
-    const kw = keywordOf(query)
-    return newestFirst(db.facilities).filter((f) => !kw || f.location.toLowerCase().includes(kw))
-  }],
   ['get', /^\/facilities\/maintenance$/, () => (requireRole('MANAGER', 'ADMIN'), [...db.facilityMaintenance].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map(facilityMtDto))],
   ['get', /^\/facilities\/(\d+)$/, ({ p }) => (requireRole('MANAGER', 'ADMIN'), byId(db.facilities, p[0]))],
   ['post', /^\/facilities$/, ({ body }) => {

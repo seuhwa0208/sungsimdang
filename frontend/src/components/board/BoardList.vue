@@ -37,7 +37,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import PageHeader from '../common/PageHeader.vue'
 import BaseButton from '../common/BaseButton.vue'
 import BaseSelect from '../common/BaseSelect.vue'
@@ -58,6 +58,8 @@ const props = defineProps({
   description: { type: String, default: '' },
   basePath: String, // '/notices' | '/data-room'
   fetcher: Function,
+  // 서버 검색 API. ({ type, keyword }) => Promise. 없으면 목록을 받아 프론트에서 검색한다.
+  searcher: { type: Function, default: null },
   emptyText: { type: String, default: '등록된 게시글이 없습니다.' },
 })
 
@@ -65,12 +67,14 @@ const auth = useAuthStore()
 const canWrite = computed(() => auth.isAdmin)
 
 const field = ref('all')
-const fieldOptions = [
+const allFieldOptions = [
   { value: 'all', label: '전체' },
   { value: 'title', label: '제목' },
   { value: 'content', label: '내용' },
   { value: 'author', label: '작성자' },
 ]
+// 서버 검색(TITLE / CONTENT / 그 외=제목+내용)은 작성자 검색을 지원하지 않는다.
+const fieldOptions = computed(() => (props.searcher ? allFieldOptions.filter((o) => o.value !== 'author') : allFieldOptions))
 const resetField = () => {
   field.value = 'all'
 }
@@ -79,6 +83,11 @@ const list = useListView((params) => props.fetcher(params), {
   searchFields: (r) => (field.value === 'all' ? [r.title, r.content, r.author] : [r[field.value]]),
   sort: (a, b) => (b.id ?? 0) - (a.id ?? 0),
   watchSources: [field],
+  serverSearch: props.searcher ? (keyword) => props.searcher({ type: field.value.toUpperCase(), keyword }) : null,
+})
+// 서버 검색 중에 검색 항목만 바꾸면 같은 검색어로 다시 조회한다.
+watch(field, () => {
+  if (props.searcher && list.submittedKeyword.value.trim()) list.load()
 })
 const showAuthor = computed(() => list.items.value.some((r) => r.author))
 const showHits = computed(() => list.items.value.some((r) => r.hits != null))

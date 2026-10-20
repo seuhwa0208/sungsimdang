@@ -10,7 +10,8 @@ import { parseError } from '../utils/errors'
  * - 검색어·페이지는 URL query(q, page)에 보존한다.
  */
 export function useListView(fetcher, options = {}) {
-  const { pageSize = 10, searchFields = () => [], predicate = null, sort = null, watchSources = [] } = options
+  // serverSearch: (keyword) => Promise. 지정하면 검색어 제출 시 목록 대신 이 함수로 서버 검색 결과를 받아 온다. (프론트 필터링은 생략)
+  const { pageSize = 10, searchFields = () => [], predicate = null, sort = null, watchSources = [], serverSearch = null } = options
   const route = useRoute()
   const router = useRouter()
 
@@ -31,7 +32,8 @@ export function useListView(fetcher, options = {}) {
       const params = serverPaged.value
         ? { page: page.value - 1, size: pageSize, keyword: submittedKeyword.value || undefined }
         : undefined
-      const res = normalizeList(await fetcher(params))
+      const kw = submittedKeyword.value.trim()
+      const res = normalizeList(serverSearch && kw ? await serverSearch(kw) : await fetcher(params))
       if (res.serverPaged && !serverPaged.value) {
         serverPaged.value = true
         return await load() // 서버 페이징 확인 → 파라미터를 붙여 다시 조회
@@ -49,7 +51,7 @@ export function useListView(fetcher, options = {}) {
     if (serverPaged.value) return items.value
     const kw = submittedKeyword.value.trim().toLowerCase()
     let list = items.value
-    if (kw) {
+    if (kw && !serverSearch) {
       list = list.filter((it) => searchFields(it).some((v) => String(v ?? '').toLowerCase().includes(kw)))
     }
     if (predicate) list = list.filter(predicate)
@@ -84,11 +86,12 @@ export function useListView(fetcher, options = {}) {
     })
     if (serverPaged.value) load()
   })
+  if (serverSearch) watch(submittedKeyword, () => load())
   watch(totalPages, (n) => {
     if (!serverPaged.value && page.value > n) page.value = n
   })
 
   load()
 
-  return { items, loading, error, keyword, page, total, totalPages, pageItems, pageSize, load, search, reset, serverPaged }
+  return { items, loading, error, keyword, submittedKeyword, page, total, totalPages, pageItems, pageSize, load, search, reset, serverPaged }
 }

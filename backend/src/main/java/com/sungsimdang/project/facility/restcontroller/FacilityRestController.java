@@ -54,13 +54,6 @@ public class FacilityRestController {
         return facilityService.findAllOrderByStatus();
     }
 
-    //시설 검색(위치로만)
-    @GetMapping("/search")
-    @ResponseStatus(HttpStatus.OK)
-    public List<FacilityResponse> searchList(@RequestParam FacilityLocation location, HttpSession session){
-        requireAdmin(session);
-        return facilityService.findByLocationList(location);
-    }
     // 시설 상세
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
@@ -135,16 +128,11 @@ public class FacilityRestController {
     public List<FacilityResponse> listMember() {
         return facilityService.findAll();
     }
-    // 자전거 위치별 검색
+    // 시설 위치별 검색
     @GetMapping("/member/search")
     @ResponseStatus(HttpStatus.OK)
     public List<FacilityResponse> listLocation(@RequestParam("location") FacilityLocation location) {
         return facilityService.findByLocationList(location);
     }
-    // 자전거 상세 보기
-    @GetMapping("/member/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public FacilityResponse detail(@PathVariable("id") Long id) {
-        return facilityService.findByFacility(id);
-    }
+
 }

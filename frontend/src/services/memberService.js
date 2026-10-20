@@ -19,9 +19,7 @@ const STATUS_PATH = { ACTIVE: 'activate', INACTIVE: 'inactivate', KICKED: 'kick'
 
 export const adminMemberService = {
   list: (params) => api.get('/admin', { params }).then((r) => r.data),
-  get: (id) => api.get(`/admin/${id}`).then((r) => r.data),
   getByLoginId: (loginId) => api.get(`/admin/login-id/${encodeURIComponent(loginId)}`).then((r) => r.data),
-  update: (id, payload) => api.put(`/admin/${id}`, payload).then((r) => r.data), // 회원 정보 수정
   updateRole: (id, role) => api.patch(`/admin/${id}/role`, { role }).then((r) => r.data),
   updateStatus: (id, status) => {
     const path = STATUS_PATH[status]

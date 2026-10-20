@@ -10,7 +10,6 @@ export const facilityService = {
   // ---- 관리자 ----
   list: (params) => api.get(BASE, { params }).then(unwrap), // 목록 - 최신순
   listByStatus: (params) => api.get(`${BASE}/status`, { params }).then(unwrap), // 목록 - 상태별 정렬
-  search: (params) => api.get(`${BASE}/search`, { params }).then(unwrap), // 검색(위치로만)
   get: (id) => api.get(`${BASE}/${id}`).then(unwrap),
   create: (payload) => api.post(BASE, payload).then(unwrap), // FacilityRequest { location, facilityType }
   update: (id, payload) => api.put(`${BASE}/${id}`, payload).then(unwrap),
@@ -30,5 +29,4 @@ export const facilityService = {
   // ---- 사용자 ----
   memberList: (params) => api.get(`${BASE}/member`, { params }).then(unwrap), // 목록 - 최신순
   memberSearch: (params) => api.get(`${BASE}/member/search`, { params }).then(unwrap),
-  memberGet: (id) => api.get(`${BASE}/member/${id}`).then(unwrap),
 }

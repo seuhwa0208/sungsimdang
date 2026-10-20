@@ -45,7 +45,7 @@ public class SpringSecurity {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 // SPA: XSRF-TOKEN 쿠키 발급 및 X-XSRF-TOKEN 헤더 검증
-                .csrf(csrf -> csrf.spa())
+                .csrf(csrf -> csrf.disable())
                 //인가 방법
                 .authorizeHttpRequests(auth -> auth
                         //모든 사용자에 대한 접근 => permitAll()
