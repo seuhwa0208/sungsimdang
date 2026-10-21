@@ -11,7 +11,7 @@
           </div>
           <h1 class="mt-1 text-xl font-bold text-gray-900 sm:text-2xl">{{ qna.title }}</h1>
           <p class="mt-3 text-sm text-gray-500">
-            <template v-if="qna.author">작성자 {{ qna.author }} · </template>작성일 {{ formatDateTime(qna.createdAt) }} · 조회수 {{ qna.hits ?? 0 }}
+            <template v-if="qna.author">작성자 {{ formatAuthorName(qna.author) }} · </template>작성일 {{ formatDateTime(qna.createdAt) }} · 조회수 {{ qna.hits ?? 0 }}
           </p>
         </header>
         <div class="whitespace-pre-wrap break-words p-6 text-sm leading-7 text-gray-800">{{ qna.content }}</div>
@@ -72,6 +72,7 @@ import { useSubmit } from '../../composables/useSubmit'
 import { qnaService } from '../../services/qnaService'
 import { normalizeList } from '../../utils/list'
 import { qnaStatusLabels, labelOf, statusTone } from '../../utils/statusLabels'
+import { formatAuthorName } from '../../utils/format'
 import { formatDateTime } from '../../utils/formatDate'
 
 const props = defineProps({ id: { type: String, required: true } })
@@ -122,3 +123,4 @@ async function doDelete() {
   else router.push('/qna')
 }
 </script>
+

@@ -79,6 +79,7 @@ public class BikeService {
     @Transactional
     public void bikeDelete(Long id) {
         Bike bike = bikeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("자전거를 찾을 수 없습니다."));
+        bikeMaintenanceRepository.deleteByBike_Id(id);
         bikeRepository.delete(bike);
     }
 

@@ -26,7 +26,7 @@
         <tr v-for="row in list.pageItems.value" :key="row.id" class="cursor-pointer hover:bg-gray-50" @click="$router.push(`${basePath}/${row.id}`)">
           <td class="px-4 py-3 text-gray-500">{{ row.id }}</td>
           <td class="px-4 py-3 font-medium text-gray-900">{{ row.title }}</td>
-          <td v-if="showAuthor" class="hidden px-4 py-3 text-gray-600 sm:table-cell">{{ row.author || '-' }}</td>
+          <td v-if="showAuthor" class="hidden px-4 py-3 text-gray-600 sm:table-cell">{{ formatAuthorName(row.author) }}</td>
           <td class="px-4 py-3 text-gray-500">{{ formatDate(row.createdAt) }}</td>
           <td v-if="showHits" class="hidden px-4 py-3 text-gray-500 sm:table-cell">{{ row.hits ?? '-' }}</td>
         </tr>
@@ -50,6 +50,7 @@ import BasePagination from '../common/BasePagination.vue'
 import BoardTabs from './BoardTabs.vue'
 import { useAuthStore } from '../../stores/authStore'
 import { useListView } from '../../composables/useListView'
+import { formatAuthorName } from '../../utils/format'
 import { formatDate } from '../../utils/formatDate'
 
 // 공지사항 / 자료실 목록 공용. 작성자·조회수는 응답에 실제로 있을 때만 컬럼을 표시한다.
@@ -92,3 +93,4 @@ watch(field, () => {
 const showAuthor = computed(() => list.items.value.some((r) => r.author))
 const showHits = computed(() => list.items.value.some((r) => r.hits != null))
 </script>
+

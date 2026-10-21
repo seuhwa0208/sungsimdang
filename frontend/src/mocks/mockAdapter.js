@@ -49,7 +49,7 @@ const keywordOf = (query) => String(query.keyword ?? query.q ?? query.title ?? q
 // 실제 DTO와 동일하게 기록에 저장된 당시 상태를 반환한다. 접수는 REPAIRING, 완료는 AVAILABLE.
 const bikeMtDto = (r) => ({ id: r.id, bikeId: r.bikeId, createdAt: r.createdAt, status: r.status, faultType: r.faultType, memberLoginId: r.memberLoginId })
 const facilityMtDto = (r) => ({ id: r.id, facilityId: r.facilityId, createdAt: r.createdAt, facilityStatus: r.facilityStatus, faultType: r.faultType, memberLoginId: r.memberLoginId })
-const qnaDto = ({ memberId, ...q }) => q
+const qnaDto = ({ memberId, ...q }) => ({ ...q, author: byId(db.members, memberId).loginId })
 
 // 게시판(공지/자료실) 공통 CRUD + 검색
 function boardRoutes(prefix, key, seqKey) {
@@ -402,3 +402,4 @@ export function installMock() {
   api.defaults.adapter = mockAdapter
   console.info('[MOCK] 실제 API 대신 Mock 어댑터를 사용합니다.')
 }
+

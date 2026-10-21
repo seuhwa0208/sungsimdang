@@ -7,7 +7,7 @@
         <p class="text-xs font-semibold text-brand-600">{{ label }}</p>
         <h1 class="mt-1 text-xl font-bold text-gray-900 sm:text-2xl">{{ post.title }}</h1>
         <p class="mt-3 text-sm text-gray-500">
-          <span v-if="post.author">작성자 {{ post.author }} · </span>작성일 {{ formatDateTime(post.createdAt) }}<span v-if="post.hits != null"> · 조회수 {{ post.hits }}</span>
+          <span v-if="post.author">작성자 {{ formatAuthorName(post.author) }} · </span>작성일 {{ formatDateTime(post.createdAt) }}<span v-if="post.hits != null"> · 조회수 {{ post.hits }}</span>
           <span v-if="isEdited"> (수정 {{ formatDateTime(post.updatedAt) }})</span>
         </p>
       </header>
@@ -46,6 +46,7 @@ import ConfirmDialog from '../common/ConfirmDialog.vue'
 import { useAuthStore } from '../../stores/authStore'
 import { useAsyncData } from '../../composables/useAsyncData'
 import { useSubmit } from '../../composables/useSubmit'
+import { formatAuthorName } from '../../utils/format'
 import { formatDateTime } from '../../utils/formatDate'
 
 const props = defineProps({ id: [String, Number], label: String, basePath: String, service: Object })
@@ -65,3 +66,4 @@ async function remove() {
   }
 }
 </script>
+

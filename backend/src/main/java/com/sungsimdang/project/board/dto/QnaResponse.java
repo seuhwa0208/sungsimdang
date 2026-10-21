@@ -17,6 +17,7 @@ public class QnaResponse {
     private Long id;
     private String title;
     private String content;
+    private String author;
     private String answer;
     private QnaStatus status;
     private long hits;
@@ -29,6 +30,7 @@ public class QnaResponse {
                 .id(qna.getId())
                 .title(qna.getTitle())
                 .content(qna.getContent())
+                .author(qna.getMember().getLoginId())
                 .answer(qna.getAnswer())
                 .status(qna.getStatus())
                 .hits(qna.getHits())
@@ -38,3 +40,4 @@ public class QnaResponse {
                 .build();
     }
 }
+
