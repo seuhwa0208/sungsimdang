@@ -189,7 +189,7 @@ public class DummyDataTest {
             BikeMaintenance maintenance = BikeMaintenance.builder()
                     .bike(bike)
                     .member(member)
-                    .bikeFaultType(BikeFaultType.BRAKE)
+                    .bikeFaultType(BikeFaultType.BREAK)
                     .status(BikeStatus.AVAILABLE)
                     .build();
             bikeMaintenanceRepository.save(maintenance);

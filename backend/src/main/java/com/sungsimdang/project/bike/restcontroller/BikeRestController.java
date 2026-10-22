@@ -119,7 +119,7 @@ public class BikeRestController {
     }
     // 사용자
     // 자전거 목록 - 최신순 정렬 - 사용자
-    @GetMapping("/member/")
+    @GetMapping("/member")
     @ResponseStatus(HttpStatus.OK)
     public List<BikeResponse> listMember() {
         return bikeService.listCreatedAt();
