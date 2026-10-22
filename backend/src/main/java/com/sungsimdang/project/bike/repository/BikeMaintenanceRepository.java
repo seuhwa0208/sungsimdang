@@ -1,5 +1,6 @@
 package com.sungsimdang.project.bike.repository;
 
+import com.sungsimdang.project.bike.domain.Bike;
 import com.sungsimdang.project.bike.domain.BikeMaintenance;
 import com.sungsimdang.project.bike.domain.BikeStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,5 +12,8 @@ import java.util.Optional;
 @Repository
 public interface BikeMaintenanceRepository extends JpaRepository<BikeMaintenance, Long> {
     List<BikeMaintenance> findAllByOrderByCreatedAtDesc();
+
     Optional<BikeMaintenance> findFirstByBike_IdAndStatusOrderByCreatedAtDesc(Long id, BikeStatus status);
+
+    void deleteByBike_Id(Long bikeId);
 }

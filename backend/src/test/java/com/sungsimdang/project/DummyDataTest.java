@@ -24,6 +24,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
+import static com.sungsimdang.project.member.domain.MemberRole.ADMIN;
+
 @SpringBootTest
 public class DummyDataTest {
 
@@ -76,16 +78,21 @@ public class DummyDataTest {
     @Test
     void insertDummyDataFiles() {
         List<Member> members = memberRepository.findAllByOrderByIdDesc();
+        // DB에 존재하는 관리자 계정 가져오기
+        Member admin = members.stream()
+                .filter(member -> member.getRole() == MemberRole.ADMIN)
+                .findFirst()
+                .orElseThrow(() ->
+                        new IllegalArgumentException("관리자 계정이 없습니다."));
         for (int i = 1; i <= 10000; i++) {
-            Member member = members.get(i % members.size());
             DataFiles dataFiles = DataFiles.builder()
-                    .title("더미글 "+i)
+                    .title("더미글 " + i)
                     .content("더미 데이터파일 내용 " + i + "\n입니다.")
-                    .member(member)
+                    .member(admin)
                     .build();
             dataFilesRepository.save(dataFiles);
         }
-        System.out.println("더미 데이터파일 10000건 추가 완료");
+        System.out.println("관리자 작성 자료실 더미 데이터 10000건 추가 완료");
     }
 
 
@@ -181,7 +188,7 @@ public class DummyDataTest {
     void insertDummyDataBikeMaintenance() {
         List<Bike> bikes = bikeRepository.findAll();
         Member member = memberRepository.findAll().stream()
-                .filter(m -> m.getRole() == MemberRole.ADMIN
+                .filter(m -> m.getRole() == ADMIN
                         || m.getRole() == MemberRole.MANAGER)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("정비 담당자가 없습니다."));
@@ -200,7 +207,7 @@ public class DummyDataTest {
     void insertDummyDataFacilityMaintenance() {
         List<Facility> facilities = facilityRepository.findAll();
         Member member = memberRepository.findAll().stream()
-                .filter(m -> m.getRole() == MemberRole.ADMIN
+                .filter(m -> m.getRole() == ADMIN
                         || m.getRole() == MemberRole.MANAGER)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("정비 담당자가 없습니다."));

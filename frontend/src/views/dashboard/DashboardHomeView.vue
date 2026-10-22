@@ -7,13 +7,13 @@
       </div>
       <!-- 요약 카드: 전용 통계 API 가 없으므로 기존 목록 API 응답으로만 집계 -->
       <div class="flex flex-wrap items-center gap-2">
-        <RouterLink v-for="c in cards" :key="c.title" :to="c.to" class="flex items-center gap-2 rounded-md bg-white px-3 py-1.5 shadow-sm ring-1 ring-gray-200 transition hover:ring-brand-500">
+        <div v-for="c in cards" :key="c.title" class="flex items-center gap-2 rounded-md bg-white px-3 py-1.5 shadow-sm ring-1 ring-gray-200">
           <StatIcon :name="c.icon" class="h-5! w-5!" />
           <div class="min-w-0">
             <p class="text-[11px] font-medium leading-tight text-gray-500">{{ c.title }}</p>
             <p class="text-base font-bold leading-tight text-gray-900">{{ c.loading ? '…' : c.value }}<span class="ml-0.5 text-xs font-normal text-gray-500">{{ c.unit }}</span></p>
           </div>
-        </RouterLink>
+        </div>
       </div>
     </div>
 
@@ -221,12 +221,12 @@ const show = (state, v) => (state.failed ? '-' : v)
 
 const cards = computed(() => {
   const list = []
-  if (auth.isAdmin) list.push({ icon: 'person', title: '전체 회원 수', to: '/dashboard/members', loading: members.loading, value: show(members, members.total), unit: '명' })
+  if (auth.isAdmin) list.push({ icon: 'person', title: '전체 회원 수', loading: members.loading, value: show(members, members.total), unit: '명' })
   list.push(
-    { icon: 'bike', title: '이용가능 자전거', to: '/dashboard/bikes', loading: bikes.loading, value: show(bikes, count(bikes, 'status', 'AVAILABLE')), unit: '대' },
-    { icon: 'wrench', title: '정비중 자전거', to: '/dashboard/bikes', loading: bikes.loading, value: show(bikes, count(bikes, 'status', 'REPAIRING')), unit: '대' },
-    { icon: 'building', title: '이용가능 시설', to: '/dashboard/facilities', loading: facilities.loading, value: show(facilities, count(facilities, 'facilityStatus', 'AVAILABLE')), unit: '개' },
-    { icon: 'wrench', title: '점검중 시설', to: '/dashboard/facilities', loading: facilities.loading, value: show(facilities, count(facilities, 'facilityStatus', 'REPAIRING')), unit: '개' },
+    { icon: 'bike', title: '이용가능 자전거', loading: bikes.loading, value: show(bikes, count(bikes, 'status', 'AVAILABLE')), unit: '대' },
+    { icon: 'wrench', title: '정비중 자전거', loading: bikes.loading, value: show(bikes, count(bikes, 'status', 'REPAIRING')), unit: '대' },
+    { icon: 'building', title: '이용가능 시설', loading: facilities.loading, value: show(facilities, count(facilities, 'facilityStatus', 'AVAILABLE')), unit: '개' },
+    { icon: 'wrench', title: '점검중 시설', loading: facilities.loading, value: show(facilities, count(facilities, 'facilityStatus', 'REPAIRING')), unit: '개' },
   )
   return list
 })
@@ -352,3 +352,4 @@ async function changeStatus(kind, item, next) {
   }
 }
 </script>
+

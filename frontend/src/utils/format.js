@@ -12,3 +12,6 @@ export const facilityName = (f) => (f ? `${locationLabel(f.location)} ${labelOf(
 
 export const formatDistance = (v) =>
   v == null ? '-' : `${Number(v).toLocaleString('ko-KR', { maximumFractionDigits: 1 })} km`
+
+// 관리자 계정의 게시글 작성자 표시명. 서버의 계정 아이디는 유지한다.
+export const formatAuthorName = (author) => author === 'admin' ? '관리자' : (author || '-')

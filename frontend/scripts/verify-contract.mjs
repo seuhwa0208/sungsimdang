@@ -147,7 +147,9 @@ try {
     assert.equal(rows.filter(row => row.status === 'AVAILABLE').length, 5)
     assert.equal(rows.find(row => row.id === 1).location, 'DAEJEON')
     assert.ok((await facility.memberList()).every(row => !('facilityNo' in row)))
-    assert.ok((await qna.list()).every(row => !('memberId' in row) && !('author' in row)))
+    assert.ok((await qna.list()).every(row => !('memberId' in row) && typeof row.author === 'string'))
+    assert.equal((await qna.get(1)).author, 'user01')
+    assert.equal((await qna.get(3)).author, 'manager01')
   })
   await check('ordinary user can edit own answered question, not another user question', async () => {
     await member.login({ loginId: 'user01', password: 'Test123!' })
@@ -213,3 +215,4 @@ try {
   await server.close()
   delete globalThis.sessionStorage
 }
+

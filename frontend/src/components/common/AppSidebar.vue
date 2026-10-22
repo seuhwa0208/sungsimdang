@@ -20,9 +20,6 @@ import { useAuthStore } from '../../stores/authStore'
 const auth = useAuthStore()
 const items = [
   { to: '/dashboard', label: '통합 운영 현황', roles: ['MANAGER', 'ADMIN'], exact: true },
-  { to: '/dashboard/bikes', label: '타슈 관리', roles: ['MANAGER', 'ADMIN'] },
-  { to: '/dashboard/facilities', label: '기반시설 관리', roles: ['MANAGER', 'ADMIN'] },
-  { to: '/dashboard/members', label: '회원 관리', roles: ['ADMIN'] },
   { to: '/dashboard/qna', label: 'Q&A 관리', roles: ['ADMIN'] },
 ]
 const visible = computed(() => items.filter((i) => auth.hasRole(i.roles)))

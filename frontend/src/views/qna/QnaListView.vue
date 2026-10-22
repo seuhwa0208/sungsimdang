@@ -29,7 +29,7 @@
         <tr v-for="q in list.pageItems.value" :key="q.id" class="cursor-pointer hover:bg-gray-50" @click="$router.push(`/qna/${q.id}`)">
           <td class="px-4 py-3 text-gray-500">{{ q.id }}</td>
           <td class="px-4 py-3 font-medium text-gray-900">{{ q.title }}</td>
-          <td v-if="showAuthor" class="hidden px-4 py-3 text-gray-600 sm:table-cell">{{ q.author || '-' }}</td>
+          <td v-if="showAuthor" class="hidden px-4 py-3 text-gray-600 sm:table-cell">{{ formatAuthorName(q.author) }}</td>
           <td class="px-4 py-3"><StatusBadge :label="labelOf(qnaStatusLabels, q.status)" :tone="statusTone[q.status]" /></td>
           <td class="hidden px-4 py-3 text-gray-500 sm:table-cell">{{ q.hits ?? 0 }}</td>
           <td class="px-4 py-3 text-gray-500">{{ formatDate(q.createdAt) }}</td>
@@ -58,6 +58,7 @@ import { useAuthStore } from '../../stores/authStore'
 import { useListView } from '../../composables/useListView'
 import { qnaService } from '../../services/qnaService'
 import { qnaStatusLabels, labelOf, statusTone, toOptions } from '../../utils/statusLabels'
+import { formatAuthorName } from '../../utils/format'
 import { formatDate } from '../../utils/formatDate'
 
 const auth = useAuthStore()
@@ -74,3 +75,4 @@ const list = useListView((p) => qnaService.list(p), {
 })
 const showAuthor = computed(() => list.items.value.some((q) => q.author))
 </script>
+
