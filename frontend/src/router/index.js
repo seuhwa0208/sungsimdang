@@ -37,10 +37,7 @@ const routes = [
   { path: '/facilities', name: 'facilities', component: () => import('../views/facility/FacilityListView.vue') },
 
   { path: '/dashboard', name: 'dashboard', component: () => import('../views/dashboard/DashboardHomeView.vue'), meta: { auth: true, roles: OPS, layout: 'dashboard' } },
-  { path: '/dashboard/members', name: 'dashboard-members', component: () => import('../views/dashboard/MemberManagementView.vue'), meta: { auth: true, roles: ADMIN, layout: 'dashboard' } },
-  { path: '/dashboard/bikes', name: 'dashboard-bikes', component: () => import('../views/dashboard/BikeManagementView.vue'), meta: { auth: true, roles: OPS, layout: 'dashboard' } },
   { path: '/dashboard/bikes/:id(\\d+)/maintenance', name: 'dashboard-bike-maintenance', component: () => import('../views/dashboard/BikeMaintenanceView.vue'), props: true, meta: { auth: true, roles: OPS, layout: 'dashboard' } },
-  { path: '/dashboard/facilities', name: 'dashboard-facilities', component: () => import('../views/dashboard/FacilityManagementView.vue'), meta: { auth: true, roles: OPS, layout: 'dashboard' } },
   { path: '/dashboard/facilities/:id(\\d+)/maintenance', name: 'dashboard-facility-maintenance', component: () => import('../views/dashboard/FacilityMaintenanceView.vue'), props: true, meta: { auth: true, roles: OPS, layout: 'dashboard' } },
   { path: '/dashboard/qna', name: 'dashboard-qna', component: () => import('../views/dashboard/QnaManagementView.vue'), meta: { auth: true, roles: ADMIN, layout: 'dashboard' } },
 

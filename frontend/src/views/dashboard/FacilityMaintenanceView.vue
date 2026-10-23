@@ -5,7 +5,7 @@
     <p v-if="notice" class="mb-3 rounded-md bg-green-50 p-3 text-sm text-green-800" role="status">{{ notice }}</p>
 
     <LoadingState v-if="facLoading" />
-    <ErrorState v-else-if="facError" :error="facError" back-to="/dashboard/facilities" @retry="loadFacility" />
+    <ErrorState v-else-if="facError" :error="facError" back-to="/dashboard" @retry="loadFacility" />
     <template v-else-if="facility">
       <section class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
         <h2 class="text-lg font-bold">점검 / 고장 접수</h2>
@@ -97,3 +97,4 @@ async function doConfirm() {
   await Promise.all([loadFacility(), loadHistory()])
 }
 </script>
+

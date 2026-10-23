@@ -75,6 +75,7 @@ public class FacilityService {
     @Transactional
     public void delete(Long id){
         Facility facility = findById(id);
+        facilityMaintenanceRepository.deleteByFacility_Id(id);
         facilityRepository.delete(facility);
     }
     

@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface FacilityMaintenanceRepository extends JpaRepository<FacilityMaintenance, Long> {
     List<FacilityMaintenance> findAllByOrderByCreatedAtDesc();
     Optional<FacilityMaintenance> findFirstByFacility_IdAndFacilityStatusOrderByCreatedAtDesc(Long facilityId, FacilityStatus facilityStatus);
+    void deleteByFacility_Id (Long facilityId);
 }

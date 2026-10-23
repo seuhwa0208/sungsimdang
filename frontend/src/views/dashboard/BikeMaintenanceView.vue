@@ -5,7 +5,7 @@
     <p v-if="notice" class="mb-3 rounded-md bg-green-50 p-3 text-sm text-green-800" role="status">{{ notice }}</p>
 
     <LoadingState v-if="bikeLoading" />
-    <ErrorState v-else-if="bikeError" :error="bikeError" back-to="/dashboard/bikes" @retry="loadBike" />
+    <ErrorState v-else-if="bikeError" :error="bikeError" back-to="/dashboard" @retry="loadBike" />
     <template v-else-if="bike">
       <!-- 현재 상태 카드: 서버가 제공하는 값 + 이력에서 근거 있게 유도한 값만 표시 -->
       <section class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200">
@@ -101,3 +101,4 @@ async function doConfirm() {
   await Promise.all([loadBike(), loadHistory()]) // 현재 상태와 이력을 서버 기준으로 다시 조회
 }
 </script>
+
