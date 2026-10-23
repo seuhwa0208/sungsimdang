@@ -57,12 +57,12 @@ public class DummyDataTest {
     private QnaService qnaService;
 
     @Test
-    void insertDummyData() {
+    void insertDummyDataQna() {
         List<Member> members = memberRepository.findAllByOrderByIdDesc();
         if (members.isEmpty()) {
             throw new IllegalArgumentException("더미 데이터를 넣으려면 회원이 최소 1명은 있어야 함.");
         }
-        for (int i = 1; i <= 10000; i++) {
+        for (int i = 1; i <= 100; i++) {
             Member member = members.get(i % members.size());
 
             Qna qna = Qna.builder()
@@ -84,7 +84,7 @@ public class DummyDataTest {
                 .findFirst()
                 .orElseThrow(() ->
                         new IllegalArgumentException("관리자 계정이 없습니다."));
-        for (int i = 1; i <= 10000; i++) {
+        for (int i = 1; i <= 100; i++) {
             DataFiles dataFiles = DataFiles.builder()
                     .title("더미글 " + i)
                     .content("더미 데이터파일 내용 " + i + "\n입니다.")
@@ -102,7 +102,7 @@ public class DummyDataTest {
         bikeMaintenanceRepository.deleteAll();
         bikeRepository.deleteAll();
         List<Bike> bikes = bikeRepository.findAllByOrderByCreatedAtDesc();
-        for (int i = 1; i <= 10000; i++) {
+        for (int i = 1; i <= 100; i++) {
 
             Bike bike = Bike.builder()
                     .location(BikeLocation.BANSEOK)
@@ -117,7 +117,7 @@ public class DummyDataTest {
         facilityMaintenanceRepository.deleteAll();
         facilityRepository.deleteAll();
         List<Facility> facilities = facilityRepository.findAllByOrderByCreatedAtDesc();
-        for (int i = 1; i <= 2500; i++) {
+        for (int i = 1; i <= 25; i++) {
 
             Facility facility = Facility.builder()
                     .location(FacilityLocation.CITY_HALL)
@@ -125,7 +125,7 @@ public class DummyDataTest {
                     .build();
             facilityRepository.save(facility);
         }
-        for (int i = 1; i <= 2500; i++) {
+        for (int i = 1; i <= 25; i++) {
 
             Facility facility = Facility.builder()
                     .location(FacilityLocation.CITY_HALL)
@@ -133,7 +133,7 @@ public class DummyDataTest {
                     .build();
             facilityRepository.save(facility);
         }
-        for (int i = 1; i <= 2500; i++) {
+        for (int i = 1; i <= 20; i++) {
 
             Facility facility = Facility.builder()
                     .location(FacilityLocation.CITY_HALL)
@@ -141,7 +141,7 @@ public class DummyDataTest {
                     .build();
             facilityRepository.save(facility);
         }
-        for (int i = 1; i <= 2500; i++) {
+        for (int i = 1; i <= 25; i++) {
 
             Facility facility = Facility.builder()
                     .location(FacilityLocation.CITY_HALL)
@@ -157,7 +157,7 @@ public class DummyDataTest {
         if (members.isEmpty()) {
             throw new IllegalArgumentException("더미 데이터를 넣으려면 회원이 최소 1명은 있어야 함.");
         }
-        for (int i = 1; i <= 10000; i++) {
+        for (int i = 1; i <= 100; i++) {
             Member member = members.get(i % members.size());
 
             Notice notice = Notice.builder()
@@ -173,7 +173,7 @@ public class DummyDataTest {
     @Test
     void insertDummyDataMember() {
         List<Member> members = memberRepository.findAllByOrderByIdDesc();
-        for (int i = 1; i <= 10000; i++) {
+        for (int i = 1; i <= 100; i++) {
             Member member = Member.builder()
                     .loginId("dummyMan "+i)
                     .name("더미휴먼 " + i)
@@ -237,7 +237,7 @@ public class DummyDataTest {
             qna.writeAnswer("문의하신 사항을 확인했습니다. 감사합니다.");
             qnaRepository.save(qna);
             count++;
-            if (count >= 5000) {
+            if (count >= 50) {
                 break;
             }
         }
