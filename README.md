@@ -8,16 +8,19 @@
 1. [프로젝트 소개](#프로젝트-소개)
 2. [주요 기능](#주요-기능)
 3. [프로젝트 구조](#프로젝트-구조)
-4. [1단계 — 프로그램 설치](#1단계--프로그램-설치)
-5. [2단계 — GitHub에서 소스코드 다운로드](#2단계--github에서-소스코드-다운로드)
-6. [3단계 — PostgreSQL 데이터베이스 준비](#3단계--postgresql-데이터베이스-준비)
-7. [4단계 — Spring Boot 백엔드 실행](#4단계--spring-boot-백엔드-실행)
-8. [5단계 — Vue 프론트엔드 실행](#5단계--vue-프론트엔드-실행)
-9. [Gradle로 실행 파일(JAR) 만들기](#gradle로-실행-파일jar-만들기)
-10. [Docker 다운로드 및 실행 가이드](#docker-다운로드-및-실행-가이드)
-11. [자주 발생하는 오류](#자주-발생하는-오류)
-12. [보안 및 배포 전 확인사항](#보안-및-배포-전-확인사항)
-
+4. [GitHub 소스코드 설치 및 실행](#github-소스코드-설치-및-실행)
+   - [1단계 — 프로그램 설치](#1단계--프로그램-설치)
+   - [2단계 — GitHub에서 소스코드 다운로드](#2단계--github에서-소스코드-다운로드)
+   - [3단계 — PostgreSQL 데이터베이스 준비](#3단계--postgresql-데이터베이스-준비)
+   - [4단계 — Spring Boot 백엔드 실행](#4단계--spring-boot-백엔드-실행)
+   - [5단계 — Vue 프론트엔드 실행](#5단계--vue-프론트엔드-실행)
+5. [Docker Hub 이미지 설치 및 실행 가이드](#docker-hub-이미지-설치-및-실행-가이드)
+   - [1. Docker Desktop 설치](#1-docker-desktop-설치)
+   - [2. Docker 설치 확인](#2-docker-설치-확인)
+   - [3. Docker Compose 파일 준비](#3-docker-compose-파일-준비)
+   - [4. Docker Hub 이미지 다운로드 및 실행](#4-docker-hub-이미지-다운로드-및-실행)
+   - [5. 실행 확인 및 접속](#5-실행-확인-및-접속)
+6. [자주 발생하는 오류](#자주-발생하는-오류)
 ---
 
 ## 프로젝트 소개
@@ -72,14 +75,16 @@ sungsimdang/                       ← git clone 후 생성되는 폴더
 
 ---
 
-## 설치 가이드
+## GitHub 소스코드 설치 및 실행
 
-**두 개의 방법 중 하나만 선택해 주세요**
+**GitHub 소스코드로 실행하는 경우, 아래 데이터베이스 준비 방법 A/B 중 하나를 선택해 주세요.**
+
+> Docker Hub의 완성된 이미지로 전체 프로젝트를 실행하려면 [Docker Hub 이미지 설치 및 실행 가이드](#docker-hub-이미지-설치-및-실행-가이드)를 이용하세요.
 
 - **방법 A:** PC에 PostgreSQL을 직접 설치하여 사용
 - **방법 B:** Docker Desktop에서 PostgreSQL 컨테이너를 실행하여 사용 (별도 PostgreSQL 설치 불필요)
 
-## 1단계 — 프로그램 설치
+### 1단계 — 프로그램 설치
 
 Windows에서 다음 프로그램을 준비합니다.
 
@@ -89,16 +94,15 @@ Windows에서 다음 프로그램을 준비합니다.
 | JDK 21 | Spring Boot 실행 및 빌드 | [Eclipse Temurin JDK 21](https://adoptium.net/temurin/releases/?version=21) |
 | Node.js (LTS) | Vue / Vite 실행 | [Node.js 공식 홈페이지](https://nodejs.org/) |
 | PostgreSQL | 방법 A를 선택한 경우에만 설치 | [PostgreSQL Windows 다운로드](https://www.postgresql.org/download/windows/) |
-| Docker Desktop | 방법 B를 선택한 경우에만 설치 | [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/) |
+| Docker Desktop | 방법 B 또는 Docker Hub 2-Tier 전체 실행 시 설치 | [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/) |
 
+### 2단계 — GitHub에서 소스코드 다운로드
 
-## 2단계 — GitHub에서 소스코드 다운로드
-
-### 2-1. CMD 열기
+#### 2-1. CMD 열기
 
 `Windows 키 + R` → `cmd` 입력 → Enter를 누릅니다.
 
-### 2-2. 다운로드 폴더로 이동
+#### 2-2. 다운로드 폴더로 이동
 
 ```bat
 cd /d "%USERPROFILE%\Downloads"
@@ -110,7 +114,7 @@ cd /d "%USERPROFILE%\Downloads"
 cd
 ```
 
-### 2-3. GitHub 저장소 내려받기
+#### 2-3. GitHub 저장소 내려받기
 
 ```bat
 git clone https://github.com/seuhwa0208/sungsimdang.git
@@ -124,9 +128,9 @@ dir
 
 ---
 
-## 3단계 — PostgreSQL 데이터베이스 준비
+### 3단계 — PostgreSQL 데이터베이스 준비
 
-### 방법 A. PostgreSQL 직접 설치
+#### 방법 A. PostgreSQL 직접 설치
 
 1. PostgreSQL을 설치하고 서버를 실행합니다.
 2. PostgreSQL 설치 과정에서 지정한 `postgres` 계정의 비밀번호를 준비합니다.
@@ -146,9 +150,9 @@ CREATE DATABASE djtbc;
 | 사용자명 | `postgres` |
 | 비밀번호 | PostgreSQL 설치 시 지정한 값 |
 
-### 방법 B. Docker에서 PostgreSQL 실행
+#### 방법 B. Docker에서 PostgreSQL 실행
 
-**[Docker 다운로드 및 실행 가이드](#docker-다운로드-및-실행-가이드)**에 따라 Docker Desktop을 먼저 설치한 다음, 아래 컨테이너 실행 명령을 사용하세요. 방법 B는 PostgreSQL 프로그램을 Windows에 직접 설치하지 않아도 됩니다.
+**[Docker Desktop 설치](#1-docker-desktop-설치)**에 따라 Docker Desktop을 먼저 설치한 다음, 아래 컨테이너 실행 명령을 사용하세요. 방법 B는 PostgreSQL 프로그램을 Windows에 직접 설치하지 않아도 됩니다.
 
 ```bat
 docker pull postgres:16
@@ -173,7 +177,7 @@ docker start sungsimdang-db
 
 ---
 
-## 4단계 — Spring Boot 백엔드 실행
+### 4단계 — Spring Boot 백엔드 실행
 
 CMD에서 GitHub 프로젝트의 `backend` 폴더로 이동합니다. 아래는 저장소 루트에 `backend` 폴더가 있는 경우의 예시입니다.
 
@@ -184,7 +188,7 @@ dir
 
 `build.gradle`, `gradlew.bat`가 표시되는지 확인합니다.
 
-### 4-1. 데이터베이스 접속 정보 설정
+#### 4-1. 데이터베이스 접속 정보 설정
 
 **방법 A — 로컬 PostgreSQL(5432)**
 
@@ -204,7 +208,7 @@ set "SPRING_DATASOURCE_PASSWORD=CHANGE_ME를_대체한_비밀번호"
 
 `set` 명령어는 **현재 CMD 창에서만** 적용됩니다. 위 비밀번호는 실제로 설정한 값으로 변경하세요. 이미 `application.yaml`에 개인 PC용 접속 정보가 있더라도 환경변수가 이를 덮어쓰게 됩니다.
 
-### 4-2. Gradle Wrapper로 백엔드 실행
+#### 4-2. Gradle Wrapper로 백엔드 실행
 
 ```bat
 gradlew.bat bootRun
@@ -218,11 +222,11 @@ gradlew.bat bootRun
 
 ---
 
-## 5단계 — Vue 프론트엔드 실행
+### 5단계 — Vue 프론트엔드 실행
 
 **새 CMD 창**을 엽니다. 백엔드 실행 창은 그대로 둡니다.
 
-### 5-1. 프론트엔드 폴더로 이동
+#### 5-1. 프론트엔드 폴더로 이동
 
 ```bat
 cd /d "%USERPROFILE%\Downloads\sungsimdang\frontend"
@@ -231,7 +235,7 @@ dir
 
 `package.json`이 있는 위치인지 확인합니다.
 
-### 5-2. npm 패키지 설치
+#### 5-2. npm 패키지 설치
 
 ```bat
 npm install
@@ -239,7 +243,7 @@ npm install
 
 저장소에 `node_modules` 폴더가 없어도 정상입니다. `npm install`로 필요한 패키지를 설치합니다.
 
-### 5-3. 프론트엔드 실행
+#### 5-3. 프론트엔드 실행
 
 ```bat
 npm run dev
@@ -251,69 +255,93 @@ npm run dev
 
 ---
 
-## Docker 다운로드 및 실행 가이드
+## Docker Hub 이미지 설치 및 실행 가이드
+
+이 방법은 GitHub 소스코드 없이 Docker Hub에 배포된 **Backend(Spring Boot + PostgreSQL)**와 **Frontend(Vue + Nginx)** 이미지 2개로 프로젝트를 실행합니다. **Docker Desktop만 설치하면 되며**, Git·JDK·Node.js·PostgreSQL을 별도로 설치하거나 Gradle과 npm을 실행할 필요가 없습니다.
 
 ### 1. Docker Desktop 설치
 
-1. 공식 문서: **[Docker Desktop for Windows 설치](https://docs.docker.com/desktop/setup/install/windows-install/)**에 접속합니다.
-2. PC에 맞는 Windows 설치 파일을 다운로드하고 설치합니다.
-3. 안내에 따라 **WSL 2 기반 엔진**을 설정합니다. Windows 버전과 가상화 조건에 따라 추가 설정이 필요할 수 있습니다.
-4. 설치 후 Docker Desktop을 실행하고 엔진이 실행 중인 상태인지 확인합니다.
+1. [Docker Desktop for Windows 설치 안내](https://docs.docker.com/desktop/setup/install/windows-install/)에서 설치 파일을 다운로드해 설치합니다.
+2. 필요한 경우 WSL 2를 설정하고 PC를 재부팅합니다.
+3. Docker Desktop을 실행합니다.
 
-WSL이 없는 PC에서는 **관리자 권한으로 실행한 PowerShell 또는 CMD**에서 다음 명령으로 설치할 수 있습니다(필요 시 재부팅).
+### 2. Docker 설치 확인
 
-```bat
-wsl --install
-wsl --update
-```
-
-### 2. Docker 설치·동작 확인
-
-**새 CMD**에서 다음을 실행합니다.
+CMD를 열고 다음 명령어를 입력합니다.
 
 ```bat
 docker --version
 docker compose version
-docker run --rm hello-world
 ```
 
-`hello-world` 이미지가 없으면 Docker가 자동으로 이미지를 다운로드(`pull`)한 뒤 실행합니다.
+### 3. Docker Compose 파일 준비
 
-### 3. PostgreSQL Docker 이미지 다운로드
+메모장에 아래 내용을 붙여 넣고 `docker-compose.yaml`이라는 이름으로 저장합니다.
+
+```yaml
+services:
+  backend:
+    image: kyi1498/my-compose1-backend:latest
+    container_name: my-compose1-backend
+    environment:
+      POSTGRES_DB: djtbc
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      SERVER_PORT: "8088"
+      SPRING_CONFIG_ADDITIONAL_LOCATION: optional:file:/app/config/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://127.0.0.1:5432/djtbc
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+    ports:
+      - "8088:8088"
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  frontend:
+    image: kyi1498/my-compose1-frontend:latest
+    container_name: my-compose1-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+```
+
+### 4. Docker Hub 이미지 다운로드 및 실행
+
+**`docker-compose.yaml`을 저장한 CMD 창에서** DB 비밀번호를 설정합니다.
 
 ```bat
-docker pull postgres:16
+set /p "POSTGRES_PASSWORD=사용할 DB 비밀번호 입력: "
 ```
 
-이 명령은 Docker Hub에서 **PostgreSQL 실행 이미지**를 내려받습니다. **우리 프로젝트의 백엔드·프론트엔드 소스코드를 내려받는 명령은 아닙니다.** 전체 프로젝트 소스코드는 앞의 `git clone`을 사용하세요.
-
-### 4. PostgreSQL 실행 및 확인
-
-[3단계 방법 B](#방법-b-docker에서-postgresql-실행)의 `docker run` 명령을 실행합니다.
+비밀번호를 입력한 뒤 같은 CMD 창에서 다음 명령어를 실행합니다.
 
 ```bat
-docker ps
-docker logs sungsimdang-db
+docker compose pull
+docker compose up -d --no-build
 ```
 
-컨테이너 종료·재시작:
+- `docker compose pull`: 위 YAML에 지정된 Docker Hub 이미지 두 개를 다운로드합니다.
+- `docker compose up -d --no-build`: 이미지를 다시 빌드하지 않고 백그라운드에서 두 컨테이너를 실행합니다.
+- **CMD 창을 새로 열어 다시 실행하는 경우 DB 비밀번호 환경변수도 다시 설정해야 합니다.**
+
+### 5. 실행 확인 및 접속
+
+`backend`, `frontend` 서비스가 실행 중인지 확인한 후 브라우저에서 **[http://localhost/](http://localhost/)**로 접속합니다.
+
+종료할 때는 같은 폴더에서 다음 명령어를 실행합니다.
 
 ```bat
-docker stop sungsimdang-db
-docker start sungsimdang-db
+docker compose down
 ```
 
-- **Docker로 DB만 실행하는 경우에도** 백엔드는 `gradlew.bat bootRun`, 프론트엔드는 `npm run dev`로 별도 실행합니다.
-- 컨테이너를 중지해도 볼륨이 남으면 DB 데이터가 유지됩니다.
-- **주의:** 이미 사용 중인 동일한 컨테이너 이름으로 `docker run`을 다시 실행하면 충돌합니다. 기존 컨테이너가 있다면 `docker start`를 사용하세요.
-
----
-
-> **아직 준비되지 않은 경우 위 `docker compose up` 명령을 실행하면 오류가 납니다.** 특히 `compose.yaml`이 없다면 먼저 파일이 저장소에 추가되어야 합니다.
->
-> Docker Hub/GitHub Container Registry에서 `docker pull <이미지명>`으로 **프로젝트 앱 자체를 내려받는 방식**도 가능합니다. 다만 저장소 관리자가 백엔드·프론트엔드 이미지를 실제 레지스트리에 게시하고 이미지 주소를 알려준 이후에만 사용할 수 있습니다. 현재 배포된 이미지 주소는 확인되지 않아 여기서는 임의로 작성하지 않았습니다.
-
-**따라서 지금 당장 재현 가능한 실행 경로는 `GitHub Clone → PostgreSQL 준비(직접 설치 또는 Docker) → Gradle 백엔드 실행 → npm 프론트엔드 실행`입니다.**
+**주의:** `docker compose down -v`는 DB Volume을 삭제하므로 데이터 보존이 필요하면 사용하지 마세요. PC에서 80·8088·5432 포트를 이미 사용 중이면 충돌할 수 있습니다. 또한 기존 백엔드 이미지에 `ddl-auto: create` 설정이 남아 있으면 재시작 시 테이블이 초기화될 수 있습니다.
 
 ---
 
@@ -333,16 +361,3 @@ docker start sungsimdang-db
 | 포트가 이미 사용 중 | 기존 백엔드나 프론트엔드 또는 DB 컨테이너의 중복 실행 확인 |
 | `docker` 명령 오류 | Docker Desktop 설치·실행 여부 확인 |
 | `docker compose`에서 구성 파일 없음 | 저장소에 `compose.yaml`이 실제 있는지 확인 |
-
-## 보안 및 배포 전 확인사항
-
-- 실제 DB 비밀번호, API 키, 관리자 초기 비밀번호를 GitHub 공개 코드에 그대로 저장하지 마세요.
-- 기존에 비밀번호가 커밋된 적 있다면 **Git 기록에도 남을 수 있으므로 해당 비밀번호를 변경**해야 합니다.
-- 실서비스용 관리자 계정의 비밀번호와 초기 계정 자동 생성 정책을 점검해야 합니다.
-- 현재 세션 기반 로그인에서는 운영 환경의 CSRF·CORS·쿠키 정책을 확인해야 합니다. 테스트 편의를 위한 CSRF 비활성화를 운영 배포 설정으로 그대로 사용하지 마세요.
-- 더미 데이터 생성·삭제 테스트를 실제 운영 DB에서 실행하지 마세요.
-- 여기서 안내한 로컬 실행은 **자신의 PC에서 웹 애플리케이션을 동작시키는 방법**입니다. 외부 사용자를 위한 공개 배포는 별도 서버, 도메인, HTTPS, DB 백업 및 배포 설정이 필요합니다.
-
----
-
-> **문서 상태:** 첨부된 기존 README와 확인 가능한 백엔드 설정을 기준으로 작성한 **Windows 로컬 실행 + Docker PostgreSQL 실행 가이드**입니다. 전체 Docker 배포 가이드는 Docker 관련 파일 및 실제 프론트엔드 배포 설정이 준비된 후 최종 검증이 필요합니다.
