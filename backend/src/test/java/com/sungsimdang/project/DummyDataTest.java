@@ -25,6 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.List;
 
 import static com.sungsimdang.project.member.domain.MemberRole.ADMIN;
+import static java.lang.Boolean.TRUE;
 
 @SpringBootTest
 public class DummyDataTest {
@@ -62,7 +63,7 @@ public class DummyDataTest {
         if (members.isEmpty()) {
             throw new IllegalArgumentException("더미 데이터를 넣으려면 회원이 최소 1명은 있어야 함.");
         }
-        for (int i = 1; i <= 10000; i++) {
+        for (int i = 1; i <= 100; i++) {
             Member member = members.get(i % members.size());
 
             Qna qna = Qna.builder()
@@ -72,7 +73,7 @@ public class DummyDataTest {
                     .build();
             qnaRepository.save(qna);
         }
-        System.out.println("더미데이터 10000건 추가 완료");
+        System.out.println("더미데이터 100건 추가 완료");
     }
 
     @Test
@@ -84,7 +85,7 @@ public class DummyDataTest {
                 .findFirst()
                 .orElseThrow(() ->
                         new IllegalArgumentException("관리자 계정이 없습니다."));
-        for (int i = 1; i <= 10000; i++) {
+        for (int i = 1; i <= 100; i++) {
             DataFiles dataFiles = DataFiles.builder()
                     .title("더미글 " + i)
                     .content("더미 데이터파일 내용 " + i + "\n입니다.")
@@ -92,7 +93,7 @@ public class DummyDataTest {
                     .build();
             dataFilesRepository.save(dataFiles);
         }
-        System.out.println("관리자 작성 자료실 더미 데이터 10000건 추가 완료");
+        System.out.println("관리자 작성 자료실 더미 데이터 100건 추가 완료");
     }
 
 
@@ -102,14 +103,14 @@ public class DummyDataTest {
         bikeMaintenanceRepository.deleteAll();
         bikeRepository.deleteAll();
         List<Bike> bikes = bikeRepository.findAllByOrderByCreatedAtDesc();
-        for (int i = 1; i <= 10000; i++) {
+        for (int i = 1; i <= 100; i++) {
 
             Bike bike = Bike.builder()
                     .location(BikeLocation.BANSEOK)
                     .build();
             bikeRepository.save(bike);
         }
-        System.out.println("기존 데이터 삭제 후 더미데이터 1만 건 추가 완");
+        System.out.println("기존 데이터 삭제 후 더미데이터 100 건 추가 완");
     }
 
     @Test
@@ -117,7 +118,7 @@ public class DummyDataTest {
         facilityMaintenanceRepository.deleteAll();
         facilityRepository.deleteAll();
         List<Facility> facilities = facilityRepository.findAllByOrderByCreatedAtDesc();
-        for (int i = 1; i <= 2500; i++) {
+        for (int i = 1; i <= 25; i++) {
 
             Facility facility = Facility.builder()
                     .location(FacilityLocation.CITY_HALL)
@@ -125,7 +126,7 @@ public class DummyDataTest {
                     .build();
             facilityRepository.save(facility);
         }
-        for (int i = 1; i <= 2500; i++) {
+        for (int i = 1; i <= 25; i++) {
 
             Facility facility = Facility.builder()
                     .location(FacilityLocation.CITY_HALL)
@@ -133,7 +134,7 @@ public class DummyDataTest {
                     .build();
             facilityRepository.save(facility);
         }
-        for (int i = 1; i <= 2500; i++) {
+        for (int i = 1; i <= 25; i++) {
 
             Facility facility = Facility.builder()
                     .location(FacilityLocation.CITY_HALL)
@@ -141,7 +142,7 @@ public class DummyDataTest {
                     .build();
             facilityRepository.save(facility);
         }
-        for (int i = 1; i <= 2500; i++) {
+        for (int i = 1; i <= 25; i++) {
 
             Facility facility = Facility.builder()
                     .location(FacilityLocation.CITY_HALL)
@@ -149,7 +150,7 @@ public class DummyDataTest {
                     .build();
             facilityRepository.save(facility);
         }
-        System.out.println("기존 데이터 삭제 후 더미데이터 1만 건 추가 완");
+        System.out.println("기존 데이터 삭제 후 더미데이터 100 건 추가 완");
     }
     @Test
     void insertDummyDataNotice() {
@@ -157,7 +158,7 @@ public class DummyDataTest {
         if (members.isEmpty()) {
             throw new IllegalArgumentException("더미 데이터를 넣으려면 회원이 최소 1명은 있어야 함.");
         }
-        for (int i = 1; i <= 10000; i++) {
+        for (int i = 1; i <= 100; i++) {
             Member member = members.get(i % members.size());
 
             Notice notice = Notice.builder()
@@ -167,22 +168,24 @@ public class DummyDataTest {
                     .build();
             noticeRepository.save(notice);
         }
-        System.out.println("더미데이터 10000건 추가 완료");
+        System.out.println("더미데이터 100건 추가 완료");
     }
 
     @Test
     void insertDummyDataMember() {
         List<Member> members = memberRepository.findAllByOrderByIdDesc();
-        for (int i = 1; i <= 10000; i++) {
+        for (int i = 1; i <= 100; i++) {
             Member member = Member.builder()
                     .loginId("dummyMan "+i)
                     .name("더미휴먼 " + i)
                     .password("1111")
+                    .termsAgreed(TRUE)
+                    .privacyAgreed(TRUE)
                     .email("dummy"+i+"@example.com")
                     .build();
             memberRepository.save(member);
         }
-        System.out.println("더미 멤버 10000건 추가 완료");
+        System.out.println("더미 멤버 100건 추가 완료");
     }
     @Test
     void insertDummyDataBikeMaintenance() {
@@ -237,7 +240,7 @@ public class DummyDataTest {
             qna.writeAnswer("문의하신 사항을 확인했습니다. 감사합니다.");
             qnaRepository.save(qna);
             count++;
-            if (count >= 5000) {
+            if (count >= 50) {
                 break;
             }
         }
