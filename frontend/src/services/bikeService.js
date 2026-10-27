@@ -28,7 +28,7 @@ export const bikeService = {
   completeMaintenance: (id) => api.patch(`${BASE}/${id}/status`).then(unwrap),
 
   // ---- 사용자 ----
-  memberList: (params) => api.get(`${BASE}/member/`, { params }).then(unwrap), // 목록 - 최신순
+  memberList: (params) => api.get(`${BASE}/member`, { params }).then(unwrap), // 목록 - 최신순
   memberSearch: (params) => api.get(`${BASE}/member/search`, { params }).then(unwrap), // 위치별 검색
   memberGet: (id) => api.get(`${BASE}/member/${id}`).then(unwrap),
 }

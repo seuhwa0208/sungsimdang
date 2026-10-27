@@ -190,7 +190,7 @@ const routes = [
   ]),
 
   // ---- /api/bike ---- (사용자용 /member 경로는 관리자용보다 먼저 선언)
-  ['get', /^\/bike\/member\/$/, () => newestFirst(db.bikes)],
+  ['get', /^\/bike\/member$/, () => newestFirst(db.bikes)],
   ['get', /^\/bike\/member\/search$/, ({ query }) => {
     const kw = keywordOf(query)
     return newestFirst(db.bikes).filter((b) => !kw || b.location.toLowerCase().includes(kw))
